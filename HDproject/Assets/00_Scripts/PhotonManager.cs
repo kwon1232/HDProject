@@ -1,0 +1,42 @@
+using UnityEngine;
+using Photon.Pun;
+using Photon.Realtime;
+
+public class PhotonManager : MonoBehaviourPunCallbacks
+{
+    void Start()
+    {
+        // Photon 서버 연결
+        PhotonNetwork.ConnectUsingSettings();
+    }
+
+    public override void OnConnectedToMaster()
+    {
+        Debug.Log("포톤 마스터 서버에 연결하였습니다.");
+        // 랜덤 룸에 참가하거나 새로운 룸을 생성
+        PhotonNetwork.JoinRandomRoom();
+    }
+
+    public override void OnJoinRoomFailed(short returnCode, string message)
+    {
+        Debug.Log("방 참가에 실패하였습니다. 방을 새로 만듭니다.");
+        PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = 2 });
+    }
+
+    public override void OnJoinedRoom()
+    {
+        Debug.Log("룸에 접속하였습니다.");
+        SpawnPlayer();
+    }
+
+    // Instantiate - 생성자
+    // Destroy - 파괴자
+    void SpawnPlayer()
+    {
+        Vector3 spawnPosition = new Vector3(Random.Range(-0.5f, 5.0f), 0f, Random.Range(-5.0f, 5.0f));
+        PhotonNetwork.Instantiate("PlayerPrefab", spawnPosition, Quaternion.identity);
+
+        GameObject obj = Resources.Load<GameObject>("PlayerPrefab");
+        Instantiate(obj, spawnPosition, Quaternion.identity);
+    }
+}
