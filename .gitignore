@@ -76,3 +76,9 @@ HDproject/Packages/
 HDproject/obj/Debug/
 HDproject/Logs/
 HDproject/Library/
+HDproject/.vsconfig
+HDproject/Assets/ExternalDependencyManager
+HDproject/Assets/Firebase/
+HDproject/Assets/Photon
+HDproject/Assets/Settings
+HDproject/Assets/Packages
