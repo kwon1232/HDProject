@@ -60,7 +60,28 @@ public class ChatManager : MonoBehaviour, IChatClientListener
     // ex) 특정 캐릭터 머리위 말풍선 구현 시 사용
     public void OnChatStateChange(ChatState state)
     {
-        throw new System.NotImplementedException();
+        Debug.Log($"Chat State Changed : {state}");
+        //
+        // ConnectedToNameServer : Name Server와의 연결이 완료된 상태
+        // Authenticated : 인증이 완료되어 채팅 서버와 연결할 준비가 된 상태
+        // Disconnected : 연결이 끊긴 상태
+        // ConnectedToFrontEnd : Front-End 서버와 연결된 상태
+        //
+        switch(state)
+        {
+            case ChatState.ConnectedToNameServer:
+                Debug.Log($"Connected to Name Server");
+                break;
+            case ChatState.Authenticated:
+                Debug.Log($"Authenticated successfully.");
+                break;
+            case ChatState.Disconnected:
+                Debug.Log($"Connected to Front End Server");
+                break;
+            default:
+                Debug.Log($"Unhandled Chat State : {state}");
+                break;
+        }
     }
 
     // Photon.Chat 서버와 연결이 되었을 때 호출된다.
