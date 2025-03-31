@@ -107,3 +107,92 @@ HDproject/Assets/ExternalDependencyManager.meta
 HDproject/Assets/00_Scripts/PhotonManager.cs.meta
 HDproject/Assets/00_Scripts/ChatManager.cs.meta
 HDproject/Assets/TextMesh Pro/Shaders/TMPro_Mobile.cginc
+HDproject/Assets/TextMesh Pro/Sprites/EmojiOne.png.meta
+HDproject/Assets/TextMesh Pro/Sprites/EmojiOne.png
+HDproject/Assets/TextMesh Pro/Sprites/EmojiOne.json.meta
+HDproject/Assets/TextMesh Pro/Sprites/EmojiOne.json
+HDproject/Assets/TextMesh Pro/Sprites/EmojiOne Attribution.txt.meta
+HDproject/Assets/TextMesh Pro/Sprites/EmojiOne Attribution.txt
+HDproject/Assets/TextMesh Pro/Sprites.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMPro_Surface.cginc.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMPro_Surface.cginc
+HDproject/Assets/TextMesh Pro/Shaders/TMPro_Properties.cginc.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMPro_Properties.cginc
+HDproject/Assets/TextMesh Pro/Shaders/TMPro_Mobile.cginc.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMPro.cginc.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMPro.cginc
+HDproject/Assets/TextMesh Pro/Shaders/TMP_Sprite.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_Sprite.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-URP Unlit.shadergraph.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-URP Unlit.shadergraph
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-URP Lit.shadergraph.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-URP Lit.shadergraph
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Surface.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Surface.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Surface-Mobile.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Surface-Mobile.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile-2-Pass.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile-2-Pass.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile SSD.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile SSD.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-HDRP UNLIT.shadergraph.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-HDRP UNLIT.shadergraph
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-HDRP LIT.shadergraph.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF-HDRP LIT.shadergraph
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF SSD.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF SSD.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF Overlay.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_SDF Overlay.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_Bitmap.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_Bitmap.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_Bitmap-Mobile.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_Bitmap-Mobile.shader
+HDproject/Assets/TextMesh Pro/Shaders/TMP_Bitmap-Custom-Atlas.shader.meta
+HDproject/Assets/TextMesh Pro/Shaders/TMP_Bitmap-Custom-Atlas.shader
+HDproject/Assets/TextMesh Pro/Shaders/SDFFunctions.hlsl.meta
+HDproject/Assets/TextMesh Pro/Shaders/SDFFunctions.hlsl
+HDproject/Assets/TextMesh Pro/Shaders.meta
+HDproject/Assets/TextMesh Pro/Resources/TMP Settings.asset.meta
+HDproject/Assets/TextMesh Pro/Resources/TMP Settings.asset
+HDproject/Assets/TextMesh Pro/Resources/Style Sheets/Default Style Sheet.asset.meta
+HDproject/Assets/TextMesh Pro/Resources/Style Sheets/Default Style Sheet.asset
+HDproject/Assets/TextMesh Pro/Resources/Style Sheets.meta
+HDproject/Assets/TextMesh Pro/Resources/Sprite Assets/EmojiOne.asset.meta
+HDproject/Assets/TextMesh Pro/Resources/Sprite Assets/EmojiOne.asset
+HDproject/Assets/TextMesh Pro/Resources/Sprite Assets.meta
+HDproject/Assets/TextMesh Pro/Resources/LineBreaking Leading Characters.txt.meta
+HDproject/Assets/TextMesh Pro/Resources/LineBreaking Leading Characters.txt
+HDproject/Assets/TextMesh Pro/Resources/LineBreaking Following Characters.txt.meta
+HDproject/Assets/TextMesh Pro/Resources/LineBreaking Following Characters.txt
+HDproject/Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset.meta
+HDproject/Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset
+HDproject/Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Outline.mat.meta
+HDproject/Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Outline.mat
+HDproject/Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset.meta
+HDproject/Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset
+HDproject/Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Drop Shadow.mat.meta
+HDproject/Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Drop Shadow.mat
+HDproject/Assets/TextMesh Pro/Resources/Fonts & Materials.meta
+HDproject/Assets/TextMesh Pro/Resources.meta
+HDproject/Assets/TextMesh Pro/Fonts/LiberationSans.ttf.meta
+HDproject/Assets/TextMesh Pro/Fonts/LiberationSans.ttf
+HDproject/Assets/TextMesh Pro/Fonts/LiberationSans - OFL.txt.meta
+HDproject/Assets/TextMesh Pro/Fonts/LiberationSans - OFL.txt
+HDproject/Assets/TextMesh Pro/Fonts.meta
+HDproject/Assets/TextMesh Pro.meta
+HDproject/Assets/02_Prefabs/SpeachBubble.prefab.meta
+HDproject/Assets/02_Prefabs/SpeachBubble.prefab
+HDproject/Assets/02_Prefabs/PlayerPrefab.prefab.meta
+HDproject/Assets/02_Prefabs/PlayerPrefab.prefab
+HDproject/Assets/02_Prefabs.meta
+HDproject/Assets/00_Scripts/SpeechBubble.cs.meta
+HDproject/Assets/00_Scripts/ChatUIManager.cs.meta
+HDproject/Assets/00_Scripts/BubbleUIManager.cs.meta
