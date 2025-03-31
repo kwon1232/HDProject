@@ -1,6 +1,8 @@
 using ExitGames.Client.Photon;
 using Photon.Chat;
 using Photon.Pun;
+using Photon.Realtime;
+using System.Linq;
 using UnityEngine;
 
 public class ChatManager : MonoBehaviour, IChatClientListener
@@ -15,11 +17,16 @@ public class ChatManager : MonoBehaviour, IChatClientListener
     private ChatClient chatClient;
     private string chatChannel = "GlobalChannel";
 
-    void Start()
+    public void Initalize()
     {
+        if(string.IsNullOrEmpty(PhotonNetwork.NickName))
+        {
+            PhotonNetwork.NickName = $"Player_{PhotonNetwork.LocalPlayer.ActorNumber}";
+        }
+
         chatClient = new ChatClient(this);
         chatClient.Connect(PhotonNetwork.PhotonServerSettings.AppSettings.AppIdChat,
-            PhotonNetwork.AppVersion, new AuthenticationValues(PhotonNetwork.NickName));
+            PhotonNetwork.AppVersion, new Photon.Chat.AuthenticationValues(PhotonNetwork.NickName));
     }
 
     private void Update()
@@ -27,11 +34,11 @@ public class ChatManager : MonoBehaviour, IChatClientListener
         chatClient?.Service();
     }
 
-    public void SendMessageToChat(string message)
+    public void SendMeesageToChat(string message)
     {
-        if(!string.IsNullOrEmpty(message))
+        if (!string.IsNullOrEmpty(message))
         {
-            chatClient.PublishMessage(chatChannel, $"{PhotonNetwork.NickName}: {message}");
+            chatClient.PublishMessage(chatChannel, message);
         }
         Debug.Log(message + " : 채팅을 보냈습니다. ");
     }
@@ -78,6 +85,9 @@ public class ChatManager : MonoBehaviour, IChatClientListener
             case ChatState.Disconnected:
                 Debug.Log($"Connected to Front End Server");
                 break;
+            case ChatState.ConnectedToFrontEnd:
+                Debug.Log($"Connected to Front End Server");
+                break;
             default:
                 Debug.Log($"Unhandled Chat State : {state}");
                 break;
@@ -87,13 +97,15 @@ public class ChatManager : MonoBehaviour, IChatClientListener
     // Photon.Chat 서버와 연결이 되었을 때 호출된다.
     public void OnConnected()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("Photon OnConnected");
+
+        chatClient.Subscribe(new string[] { chatChannel });
     }
 
     // Photon.Chat 서버와 연결이 끊어졌을 때 호출이 된다.
     public void OnDisconnected()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("Photon OnDisconnected");
     }
 
     // 특정 채널에서 메시지를 수신했을 때 호출된다.
@@ -102,7 +114,22 @@ public class ChatManager : MonoBehaviour, IChatClientListener
     // 매개 변수 : channelName : 메시지가 수신된 채널 이름, sender : 메시지가 보낸 사용자 이름 배열, messages 
     public void OnGetMessages(string channelName, string[] senders, object[] messages)
     {
-        throw new System.NotImplementedException();
+        for (int i = 0; i < senders.Length; i++)
+        {
+            string receivedMessage = $"{senders[i]}: {messages[i]}";
+            Debug.Log($"[{channelName}] {receivedMessage}");
+
+            ChatUIManager.instance.DisplayMessage(receivedMessage);
+
+            Player senderPlayer = PhotonNetwork.PlayerList.FirstOrDefault(p => p.NickName == senders[i]);
+            if (senderPlayer != null)
+            {
+                int actorNumber = senderPlayer.ActorNumber;
+                string message = messages[i].ToString();
+
+                BubbleUIManager.instance.ShowBubbleForPlayer(actorNumber, message);
+            }
+        }
     }
 
     // 다른 플레이어가 보낸 개인 메시지를 수신했을 때 호출된다.
@@ -126,7 +153,17 @@ public class ChatManager : MonoBehaviour, IChatClientListener
     // ex) 특정 길드 가입 후 길드 채널 구독
     public void OnSubscribed(string[] channels, bool[] results)
     {
-        throw new System.NotImplementedException();
+        for (int i = 0; i < channels.Length; i++)
+        {
+            if (results[i])
+            {
+                Debug.Log($"Subscribed to channel: {channels[i]}");
+            }
+            else
+            {
+                Debug.LogError($"Failed to subscribe to channel: {channels[i]}");
+            }
+        }
     }
 
     // 채널 구독 해제 요청이 처리되었을 때 호출된다.

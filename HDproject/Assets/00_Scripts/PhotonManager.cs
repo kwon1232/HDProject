@@ -17,7 +17,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinRandomRoom();
     }
 
-    public override void OnJoinRoomFailed(short returnCode, string message)
+    public override void OnJoinRandomFailed(short returnCode, string message)
     {
         Debug.Log("방 참가에 실패하였습니다. 방을 새로 만듭니다.");
         PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = 2 });
@@ -27,6 +27,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Debug.Log("룸에 접속하였습니다.");
         SpawnPlayer();
+        ChatManager.instance.Initalize();
+        BubbleUIManager.instance.InitalzieBubble();
     }
 
     // Instantiate - 생성자
@@ -34,9 +36,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     void SpawnPlayer()
     {
         Vector3 spawnPosition = new Vector3(Random.Range(-0.5f, 5.0f), 0f, Random.Range(-5.0f, 5.0f));
-        PhotonNetwork.Instantiate("PlayerPrefab", spawnPosition, Quaternion.identity);
-
-        GameObject obj = Resources.Load<GameObject>("PlayerPrefab");
-        Instantiate(obj, spawnPosition, Quaternion.identity);
+        GameObject playerObject = PhotonNetwork.Instantiate("PlayerPrefab", spawnPosition, Quaternion.identity);
+        PhotonNetwork.LocalPlayer.TagObject = playerObject;
     }
 }
