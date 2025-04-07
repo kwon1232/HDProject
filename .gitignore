@@ -196,3 +196,9 @@ HDproject/Assets/02_Prefabs.meta
 HDproject/Assets/00_Scripts/SpeechBubble.cs.meta
 HDproject/Assets/00_Scripts/ChatUIManager.cs.meta
 HDproject/Assets/00_Scripts/BubbleUIManager.cs.meta
+HDproject/Assets/01_Animations/Animations/SpeechBubble_Hide.anim
+HDproject/Assets/01_Animations/Animations/SpeechBubble_Hide.anim.meta
+HDproject/Assets/01_Animations/Animations/SpeechBubble_Open.anim
+HDproject/Assets/01_Animations/Animations/SpeechBubble_Open.anim.meta
+HDproject/Assets/01_Animations/Controller/SpeechBubble.controller
+HDproject/Assets/01_Animations/Controller/SpeechBubble.controller.meta

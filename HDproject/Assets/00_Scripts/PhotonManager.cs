@@ -37,6 +37,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         Vector3 spawnPosition = new Vector3(Random.Range(-0.5f, 5.0f), 0f, Random.Range(-5.0f, 5.0f));
         GameObject playerObject = PhotonNetwork.Instantiate("PlayerPrefab", spawnPosition, Quaternion.identity);
-        PhotonNetwork.LocalPlayer.TagObject = playerObject;
+
+        int actorNumber = PhotonNetwork.LocalPlayer.ActorNumber;
+        playerObject.GetComponent<PlayerController>().Initialize(actorNumber);
+
     }
 }

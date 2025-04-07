@@ -2,6 +2,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
+using System.Collections;
 
 public class BubbleUIManager : MonoBehaviourPunCallbacks
 {
@@ -45,9 +46,15 @@ public class BubbleUIManager : MonoBehaviourPunCallbacks
             GameObject bubble = Instantiate(bubblePrefab, transform);
             bubble.SetActive(false);
             SpeechBubble speech = bubble.GetComponent<SpeechBubble>();
-            speech.Initialize(actorNumber);
+            StartCoroutine(BubbleByActorNumberDelay(speech,actorNumber));
             playerBubbles[actorNumber] = speech;
         }
+    }
+
+    IEnumerator BubbleByActorNumberDelay(SpeechBubble speech, int actorNumber)
+    {
+        yield return new WaitForSeconds(0.3f);
+        speech.Initialize(actorNumber);
     }
 
     private void RemoveBubbleForPlayer(int actorNumber)
@@ -68,11 +75,4 @@ public class BubbleUIManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public void HideBubbleForPlayer(int actorNumber)
-    {
-        if(playerBubbles.TryGetValue(actorNumber, out SpeechBubble bubble))
-        {
-            bubble.gameObject.SetActive(false);
-        }
-    }
 }
