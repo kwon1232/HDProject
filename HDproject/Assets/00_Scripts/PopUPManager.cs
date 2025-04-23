@@ -12,6 +12,7 @@ public class PopUPManager : MonoBehaviour
         {
             instance = this; 
         }
+        transform.localScale = Vector3.one;
         gameObject.SetActive(false);
     }
 
