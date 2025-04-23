@@ -30,8 +30,11 @@ public class RayManager : MonoBehaviour
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, playerLayer))
         {
             PlayerController player = hit.collider.GetComponent<PlayerController>();
+            // If the object hit by the ray is the player, don't trace with Ray to prevent displaying the UI.
+            if (player.IsMinePhoton()) return;
             if (player != null)
             {
+                ActionHolder.TargetPlayerIndex = player.OwnerActorNumber;
                 interactionUI.gameObject.SetActive(true);
                 interactionUI.Initialize(player, Interaction_State.Player);
             }

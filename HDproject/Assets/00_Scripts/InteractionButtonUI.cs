@@ -8,8 +8,14 @@ public class InteractionButtonUI : MonoBehaviour
     public Image lineImage;
     public Image iconImage;
     public Text buttonName;
+    Button button;
 
     Action_State m_Action;
+
+    private void Awake()
+    {
+        button = GetComponent<Button>();
+    }
 
     public void Initialize(Action_State state)
     {
@@ -21,5 +27,9 @@ public class InteractionButtonUI : MonoBehaviour
         }
         iconImage.gameObject.SetActive(true);
         iconImage.sprite = ActionHolder.GetAtlas(state.ToString());
+
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(() => ActionHolder.Actions[state]());
     }
+
 }

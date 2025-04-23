@@ -1,0 +1,38 @@
+using UnityEngine;
+using UnityEngine.UI;
+using System;
+
+public class PopUPManager : MonoBehaviour
+{
+    public static PopUPManager instance = null;
+
+    private void Awake()
+    {
+        if(instance == null)
+        {
+            instance = this; 
+        }
+        gameObject.SetActive(false);
+    }
+
+    public Text description;
+    public Button yesBnt;
+    public Button noBnt;
+
+    public void Initialize(string temp, Action yes, Action no)
+    {
+        gameObject.SetActive(true);
+        description.text = temp;
+
+        RemoveAllButtons();
+
+        yesBnt.onClick.AddListener(() => yes());
+        noBnt.onClick.AddListener(() => no());
+    }
+
+    private void RemoveAllButtons()
+    {
+        yesBnt.onClick.RemoveAllListeners();
+        noBnt.onClick.RemoveAllListeners();
+    }
+}

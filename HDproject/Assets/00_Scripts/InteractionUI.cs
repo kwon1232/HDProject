@@ -44,6 +44,7 @@ public class InteractionUI : MonoBehaviour
 
     public void DeactiveObject()
     {
+        if (gameObject.activeSelf == false) return;
         animator.Play("Hexagon_Hide");
     }
 
