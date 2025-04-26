@@ -183,7 +183,7 @@ public class TMPStyleApplier : MonoBehaviour
     {
         if (mat == null || text == null) return;
 
-        // Outline
+        // 1. Outline
         if (style.outline.useOutline)
         {
             mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.width);
@@ -196,41 +196,38 @@ public class TMPStyleApplier : MonoBehaviour
             mat.DisableKeyword("OUTLINE_ON");
         }
 
-        // Main Color
+        // 2. Main Color
         if (style.mainColor.overrideColor)
         {
             text.color = style.mainColor.color;
         }
 
-        // Shadow
-        var shadowComp = text.GetComponent<UnityEngine.UI.Shadow>();
+        // 3. Shadow or Glow (Underlay 통합 처리)
+        bool enableUnderlay = false;
+
         if (style.shadow.useShadow)
         {
-            if (shadowComp == null)
-                shadowComp = text.gameObject.AddComponent<UnityEngine.UI.Shadow>();
-
-            shadowComp.effectColor = style.shadow.shadowColor;
-            shadowComp.effectDistance = style.shadow.shadowDistance;
+            mat.SetColor(ShaderUtilities.ID_UnderlayColor, style.shadow.shadowColor);
+            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, style.shadow.shadowDistance.x);
+            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, style.shadow.shadowDistance.y);
+            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.2f); // 쉐도우는 약간 소프트
+            enableUnderlay = true;
         }
-        else
+        else if (style.glow.useGlow)
         {
-            if (shadowComp != null)
-                GameObject.DestroyImmediate(shadowComp);
-        }
-
-        // Glow (Underlay)
-        if (style.glow.useGlow)
-        {
-            mat.EnableKeyword("UNDERLAY_ON");
             mat.SetColor(ShaderUtilities.ID_UnderlayColor, style.glow.glowColor);
-            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style.glow.glowOffset);
-        }
-        else
-        {
-            mat.DisableKeyword("UNDERLAY_ON");
+            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0f);
+            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, 0f);
+            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style.glow.glowOffset); // 글로우는 부드럽게
+            enableUnderlay = true;
         }
 
-        // Gradient
+        if (enableUnderlay)
+            mat.EnableKeyword("UNDERLAY_ON");
+        else
+            mat.DisableKeyword("UNDERLAY_ON");
+
+        // 4. Gradient
         if (style.gradient.useGradient)
         {
             text.enableVertexGradient = true;
@@ -246,11 +243,12 @@ public class TMPStyleApplier : MonoBehaviour
             text.enableVertexGradient = false;
         }
 
-        // Important: Update the material and text immediately
+        // 최종 적용
         text.fontMaterial = mat;
         text.UpdateMeshPadding();
         text.SetMaterialDirty();
     }
+
 
     public void ResetToDefault()
     {

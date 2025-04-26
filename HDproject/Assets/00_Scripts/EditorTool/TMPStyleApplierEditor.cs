@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEditor;
+using TMPro;
 
 [CanEditMultipleObjects]
 [CustomEditor(typeof(TMPStyleApplier))]
@@ -278,7 +279,7 @@ public class TMPStyleApplierEditor : Editor
     private void DrawStyleSettings()
     {
         TMPStyleApplier applier = (TMPStyleApplier)target;
-        TMPTextStyle currentStyle = applier.GetCurrentStyle();  // 항상 최신 상태 가져오기!
+        TMPTextStyle currentStyle = applier.GetCurrentStyle();
 
         if (currentStyle == null)
         {
@@ -297,7 +298,7 @@ public class TMPStyleApplierEditor : Editor
         var outlineProp = styleSO.FindProperty("outline");
         if (outlineProp != null)
         {
-            EditorGUILayout.PropertyField(outlineProp, true); // 하위 속성까지 표시
+            EditorGUILayout.PropertyField(outlineProp, true);
         }
 
         EditorGUILayout.Space();
@@ -316,12 +317,12 @@ public class TMPStyleApplierEditor : Editor
             EditorGUILayout.PropertyField(shadowProp, true);
         }
 
-        // Glow
-        var glowProp = styleSO.FindProperty("glow");
-        if (glowProp != null)
-        {
-            EditorGUILayout.PropertyField(glowProp, true);
-        }
+        //// Glow
+        //var glowProp = styleSO.FindProperty("glow");
+        //if (glowProp != null)
+        //{
+        //    EditorGUILayout.PropertyField(glowProp, true);
+        //}
 
         // Gradient
         var gradientProp = styleSO.FindProperty("gradient");
@@ -332,7 +333,7 @@ public class TMPStyleApplierEditor : Editor
 
         styleSO.ApplyModifiedProperties();
 
-        //  실시간 적용
+        // 변경사항 적용 Apply가 모든 처리 담당
         if (!Application.isPlaying)
         {
             applier.Apply();
