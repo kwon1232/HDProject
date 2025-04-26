@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class InteractionButtonUI : MonoBehaviour
 {
+    public InteractionUI baseInteraction;
     public Image lineImage;
     public Image iconImage;
     public Text buttonName;
@@ -29,6 +30,7 @@ public class InteractionButtonUI : MonoBehaviour
         iconImage.sprite = ActionHolder.GetAtlas(state.ToString());
 
         button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(() => baseInteraction.DeactiveObject());
         button.onClick.AddListener(() => ActionHolder.Actions[state]());
     }
 

@@ -29,6 +29,9 @@ public class PopUPManager : MonoBehaviour
 
         yesBnt.onClick.AddListener(() => yes());
         noBnt.onClick.AddListener(() => no());
+
+        yesBnt.onClick.AddListener(() => this.gameObject.SetActive(false));
+        noBnt.onClick.AddListener(() => this.gameObject.SetActive(false));
     }
 
     private void RemoveAllButtons()
