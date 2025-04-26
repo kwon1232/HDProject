@@ -72,9 +72,11 @@ public class TMPStyleApplierEditor : Editor
             applier.ResetToDefault();
         }
 
-        if (GUILayout.Button("Save TMP Style Preset", GUILayout.Height(30)))
+        EditorGUILayout.LabelField("Meterial Tools", EditorStyles.boldLabel);
+
+        if (GUILayout.Button("Load Material as Asset", GUILayout.Height(30)))
         {
-            SaveCurrentStyleAsPreset();
+            LoadMaterialAsAsset();
         }
 
         if (GUILayout.Button("Save Material as Asset", GUILayout.Height(30)))
@@ -179,6 +181,43 @@ public class TMPStyleApplierEditor : Editor
         }
 #endif
     }
+
+    private void LoadMaterialAsAsset()
+    {
+#if UNITY_EDITOR
+        if (applier == null || applier.targetText == null)
+        {
+            Debug.LogWarning("Target Text가 설정되지 않았습니다.");
+            return;
+        }
+
+        string path = EditorUtility.OpenFilePanel(
+            "Load TMP Material",
+            "Assets",
+            "mat"
+        );
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            path = FileUtil.GetProjectRelativePath(path); // 프로젝트 상대경로로 변환
+
+            Material loadedMat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (loadedMat != null)
+            {
+                Undo.RecordObject(applier.targetText, "Load TMP Material");
+                applier.targetText.fontMaterial = loadedMat;
+                applier.targetText.UpdateMeshPadding();
+                applier.targetText.SetMaterialDirty();
+                Debug.Log($"Material loaded from {path}");
+            }
+            else
+            {
+                Debug.LogWarning($"Material을 불러올 수 없습니다: {path}");
+            }
+        }
+#endif
+    }
+
 
     // Drag & Drop Area
     private void DrawPresetDragAndDropArea(TMPStyleApplier applier)
@@ -300,26 +339,5 @@ public class TMPStyleApplierEditor : Editor
         }
     }
 
-    private void SaveCurrentStyleAsPreset()
-    {
-#if UNITY_EDITOR
-        string path = EditorUtility.SaveFilePanelInProject(
-            "Save TMP Style Preset",
-            "NewTMPStyle",
-            "asset",
-            "Save TMP style settings as asset"
-        );
-
-        if (!string.IsNullOrEmpty(path))
-        {
-            TMPTextStyle clone = ScriptableObject.CreateInstance<TMPTextStyle>();
-            EditorUtility.CopySerialized(currentStyle, clone); // 여기서 현재 보고 있는 style 복제!
-            AssetDatabase.CreateAsset(clone, path);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            Debug.Log($"TMP Style Preset saved to {path}");
-        }
-#endif
-    }
 
 }
