@@ -12,6 +12,8 @@ public class TMPStyleApplierEditor : Editor
     private SerializedProperty applyLockedProp;
     private SerializedProperty isPresetLockedProp;
     private SerializedProperty backupStyleProp;
+    TMPStyleApplier applier;
+    TMPTextStyle currentStyle;
 
     // Auto-apply on drop option
     private static bool autoApplyOnDrop = true;
@@ -25,6 +27,9 @@ public class TMPStyleApplierEditor : Editor
         applyLockedProp = serializedObject.FindProperty("applyLocked");
         isPresetLockedProp = serializedObject.FindProperty("isPresetLocked");
         backupStyleProp = serializedObject.FindProperty("backupStyle");
+
+        applier = (TMPStyleApplier)target;
+        currentStyle = applier.GetCurrentStyle();  // style 연결되어 있거나 없으면 생성
     }
 
     public override void OnInspectorGUI()
@@ -38,11 +43,12 @@ public class TMPStyleApplierEditor : Editor
         EditorGUILayout.PropertyField(isPresetLockedProp);
 
         TMPStyleApplier applier = (TMPStyleApplier)target;
+        DrawStyleSettings();
 
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Style Tools", EditorStyles.boldLabel);
 
-        DrawPresetDragAndDropArea(applier);
+        DrawPresetDragAndDropArea((TMPStyleApplier)target);
 
         EditorGUILayout.Space();
 
@@ -64,6 +70,11 @@ public class TMPStyleApplierEditor : Editor
         if (GUILayout.Button("Reset to Default", GUILayout.Height(30)))
         {
             applier.ResetToDefault();
+        }
+
+        if (GUILayout.Button("Save TMP Style Preset", GUILayout.Height(30)))
+        {
+            SaveCurrentStyleAsPreset();
         }
 
         if (GUILayout.Button("Save Material as Asset", GUILayout.Height(30)))
@@ -108,6 +119,12 @@ public class TMPStyleApplierEditor : Editor
         autoApplyOnDrop = EditorGUILayout.Toggle("Auto-Apply Style On Drop", autoApplyOnDrop);
 
         serializedObject.ApplyModifiedProperties();
+
+        // 추가: 변경사항 있으면 강제로 Apply()
+        if (!Application.isPlaying && applier.targetText != null && applier.style != null)
+        {
+            applier.Apply();
+        }
     }
 
     private void BatchApplyToAllSelected()
@@ -218,4 +235,91 @@ public class TMPStyleApplierEditor : Editor
             }
         }
     }
+
+    private void DrawStyleSettings()
+    {
+        TMPStyleApplier applier = (TMPStyleApplier)target;
+        TMPTextStyle currentStyle = applier.GetCurrentStyle();  // 항상 최신 상태 가져오기!
+
+        if (currentStyle == null)
+        {
+            EditorGUILayout.HelpBox("현재 적용할 Style이 없습니다.", MessageType.Info);
+            return;
+        }
+
+        SerializedObject styleSO = new SerializedObject(currentStyle);
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Style Settings (Local Preview)", EditorStyles.boldLabel);
+
+        styleSO.Update();
+
+        // Outline
+        var outlineProp = styleSO.FindProperty("outline");
+        if (outlineProp != null)
+        {
+            EditorGUILayout.PropertyField(outlineProp, true); // 하위 속성까지 표시
+        }
+
+        EditorGUILayout.Space();
+
+        // Main Color
+        var mainColorProp = styleSO.FindProperty("mainColor");
+        if (mainColorProp != null)
+        {
+            EditorGUILayout.PropertyField(mainColorProp, true);
+        }
+
+        // Shadow
+        var shadowProp = styleSO.FindProperty("shadow");
+        if (shadowProp != null)
+        {
+            EditorGUILayout.PropertyField(shadowProp, true);
+        }
+
+        // Glow
+        var glowProp = styleSO.FindProperty("glow");
+        if (glowProp != null)
+        {
+            EditorGUILayout.PropertyField(glowProp, true);
+        }
+
+        // Gradient
+        var gradientProp = styleSO.FindProperty("gradient");
+        if (gradientProp != null)
+        {
+            EditorGUILayout.PropertyField(gradientProp, true);
+        }
+
+        styleSO.ApplyModifiedProperties();
+
+        //  실시간 적용
+        if (!Application.isPlaying)
+        {
+            applier.Apply();
+        }
+    }
+
+    private void SaveCurrentStyleAsPreset()
+    {
+#if UNITY_EDITOR
+        string path = EditorUtility.SaveFilePanelInProject(
+            "Save TMP Style Preset",
+            "NewTMPStyle",
+            "asset",
+            "Save TMP style settings as asset"
+        );
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            TMPTextStyle clone = ScriptableObject.CreateInstance<TMPTextStyle>();
+            EditorUtility.CopySerialized(currentStyle, clone); // 여기서 현재 보고 있는 style 복제!
+            AssetDatabase.CreateAsset(clone, path);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"TMP Style Preset saved to {path}");
+        }
+#endif
+    }
+
 }

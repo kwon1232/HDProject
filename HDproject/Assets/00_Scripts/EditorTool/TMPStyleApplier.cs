@@ -1,6 +1,8 @@
+
 using UnityEngine;
 using TMPro;
 using UnityEditor;
+using System;
 
 [System.Serializable]
 public class TMPStyleOutline
@@ -48,7 +50,7 @@ public class TMPTextStyle : ScriptableObject
     public TMPStyleOutline outline = new TMPStyleOutline();
     public TMPStyleMainColor mainColor = new TMPStyleMainColor();
     public TMPStyleShadow shadow = new TMPStyleShadow();
-    public TMPStyleGlow glow = new TMPStyleGlow(); 
+    public TMPStyleGlow glow = new TMPStyleGlow();
     public TMPStyleGradient gradient = new TMPStyleGradient();
 
     public void ApplyTo(TextMeshProUGUI targetText)
@@ -128,12 +130,15 @@ public class TMPTextStyle : ScriptableObject
 public class TMPStyleApplier : MonoBehaviour
 {
     [Header("Target")]
+    [SerializeField]
     public TextMeshProUGUI targetText;
 
     [Header("Style Settings")]
+    [SerializeField]
     public TMPTextStyle style;
 
     [Header("Apply Settings")]
+    [SerializeField]
     public bool applyLocked = false; // Apply 한번 하고 잠글지 여부
 
     private Material sharedMaterialInstance; // 복사본 머티리얼
@@ -141,19 +146,23 @@ public class TMPStyleApplier : MonoBehaviour
     private Material originalMaterial; // 리셋할 때 쓸 원본 저장
 
     [Header("Preset Lock Settings")]
+    [SerializeField]
     public bool isPresetLocked = false;    // Preset Lock
     public TMPTextStyle backupStyle;       // Backup before applying preset
+    private TMPTextStyle runtimePreviewStyle;
 
     public void Apply()
     {
         if (applyLocked)
         {
-            Debug.LogWarning("스타일 적용이 잠겨있습니다. Reset을 해야 다시 Apply할 수 있습니다.");
+            //Debug.LogWarning("스타일 적용이 잠겨있습니다. Reset을 해야 다시 Apply할 수 있습니다.");
             return;
         }
 
         if (targetText == null || style == null)
-            return;
+        {
+            style = ScriptableObject.CreateInstance<TMPTextStyle>();
+        }
 
         if (originalMaterial == null)
             originalMaterial = targetText.fontMaterial; // 원본 백업 (처음 Apply할 때만)
@@ -174,27 +183,80 @@ public class TMPStyleApplier : MonoBehaviour
     {
         if (mat == null || text == null) return;
 
+        // Outline
         if (style.outline.useOutline)
         {
             mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.width);
             mat.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
+            mat.EnableKeyword("OUTLINE_ON");
         }
         else
         {
             mat.SetFloat(ShaderUtilities.ID_OutlineWidth, 0f);
+            mat.DisableKeyword("OUTLINE_ON");
         }
 
+        // Main Color
         if (style.mainColor.overrideColor)
         {
             text.color = style.mainColor.color;
         }
+
+        // Shadow
+        var shadowComp = text.GetComponent<UnityEngine.UI.Shadow>();
+        if (style.shadow.useShadow)
+        {
+            if (shadowComp == null)
+                shadowComp = text.gameObject.AddComponent<UnityEngine.UI.Shadow>();
+
+            shadowComp.effectColor = style.shadow.shadowColor;
+            shadowComp.effectDistance = style.shadow.shadowDistance;
+        }
+        else
+        {
+            if (shadowComp != null)
+                GameObject.DestroyImmediate(shadowComp);
+        }
+
+        // Glow (Underlay)
+        if (style.glow.useGlow)
+        {
+            mat.EnableKeyword("UNDERLAY_ON");
+            mat.SetColor(ShaderUtilities.ID_UnderlayColor, style.glow.glowColor);
+            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style.glow.glowOffset);
+        }
+        else
+        {
+            mat.DisableKeyword("UNDERLAY_ON");
+        }
+
+        // Gradient
+        if (style.gradient.useGradient)
+        {
+            text.enableVertexGradient = true;
+            text.colorGradient = new VertexGradient(
+                style.gradient.topColor,
+                style.gradient.topColor,
+                style.gradient.bottomColor,
+                style.gradient.bottomColor
+            );
+        }
+        else
+        {
+            text.enableVertexGradient = false;
+        }
+
+        // Important: Update the material and text immediately
+        text.fontMaterial = mat;
+        text.UpdateMeshPadding();
+        text.SetMaterialDirty();
     }
 
     public void ResetToDefault()
     {
         if (targetText == null || originalMaterial == null)
         {
-            Debug.LogWarning("Reset할 원본 머티리얼이 없습니다.");
+            //Debug.LogWarning("Reset할 원본 머티리얼이 없습니다.");
             return;
         }
 
@@ -204,14 +266,14 @@ public class TMPStyleApplier : MonoBehaviour
         sharedMaterialInstance = null;
         applyLocked = false;
 
-        Debug.Log("원본 머티리얼로 복원 완료!");
+        //Debug.Log("원본 머티리얼로 복원 완료!");
     }
 
     public void SaveMaterialAsAsset(string path)
     {
         if (sharedMaterialInstance == null)
         {
-            Debug.LogWarning("저장할 머티리얼이 없습니다. 먼저 Apply를 해주세요.");
+            //Debug.LogWarning("저장할 머티리얼이 없습니다. 먼저 Apply를 해주세요.");
             return;
         }
 
@@ -234,4 +296,22 @@ public class TMPStyleApplier : MonoBehaviour
         }
     }
 #endif
+
+    public TMPTextStyle GetCurrentStyle()
+    {
+        if (style != null)
+            return style;
+
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            Undo.RecordObject(this, "Create TMP Preview Style"); // Undo 지원
+            style = ScriptableObject.CreateInstance<TMPTextStyle>();
+            style.name = "(Runtime Preview Style)";
+            return style;
+        }
+#endif
+
+        return null;
+    }
 }
