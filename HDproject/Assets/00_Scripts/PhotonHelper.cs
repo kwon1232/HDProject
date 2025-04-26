@@ -1,4 +1,5 @@
 using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
 
 public class PhotonHelper : MonoBehaviour
@@ -12,5 +13,15 @@ public class PhotonHelper : MonoBehaviour
         }
 
         return "Unknow Player!";
+    }
+
+    public static Player GetPlayer(int actionNumber)
+    {
+        foreach(var player in PhotonNetwork.PlayerList)
+        {
+            if (player.ActorNumber == actionNumber)
+                return player;
+        }
+        return null;
     }
 }

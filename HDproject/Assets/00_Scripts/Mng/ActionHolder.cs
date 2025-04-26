@@ -49,7 +49,23 @@ public class ActionHolder : MonoBehaviourPunCallbacks
             "파티를 초대하셨습니다.\n수락하시겠습니까?", 
             PhotonHelper.GetPlayerNickName(inviterID));
 
-        PopUPManager.instance.Initialize(temp, null, null);
+        // This code is a C# lambda expression,
+        // defining an Action delegate (with no parameters and a void return type).
+        Action Yes = () =>
+        {
+            Photon.Realtime.Player host = PhotonHelper.GetPlayer(inviterID);
+            Photon.Realtime.Player client = PhotonHelper.GetPlayer(targetPlayerID);
+
+            Party party = BaseManager.party.GetParty(host);
+            if (party == null)
+            {
+                party = BaseManager.party.CreateParty(host);
+            }
+
+            BaseManager.party.JoinParty(client, party.partyID);
+        };
+
+        PopUPManager.instance.Initialize(temp, Yes, null);
     }
 
     public static void Trade()
