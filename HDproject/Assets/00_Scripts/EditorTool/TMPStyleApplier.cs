@@ -18,13 +18,43 @@ public class TMPStyleMainColor
 }
 
 [System.Serializable]
-public class TMPTextStyle
+public class TMPStyleShadow
+{
+    public bool useShadow = false;
+    public Color shadowColor = Color.black;
+    public Vector2 shadowDistance = new Vector2(1f, -1f);
+}
+
+[System.Serializable]
+public class TMPStyleGlow
+{
+    public bool useGlow = false;
+    [Range(0, 1)] public float glowOffset = 0.1f;
+    public Color glowColor = Color.white;
+}
+
+[System.Serializable]
+public class TMPStyleGradient
+{
+    public bool useGradient = false;
+    public Color topColor = Color.white;
+    public Color bottomColor = Color.gray;
+}
+
+[System.Serializable]
+[CreateAssetMenu(fileName = "TMPTextStyle", menuName = "TMP Style/New Text Style")]
+public class TMPTextStyle : ScriptableObject
 {
     public TMPStyleOutline outline = new TMPStyleOutline();
     public TMPStyleMainColor mainColor = new TMPStyleMainColor();
+    public TMPStyleShadow shadow = new TMPStyleShadow();
+    public TMPStyleGlow glow = new TMPStyleGlow(); 
+    public TMPStyleGradient gradient = new TMPStyleGradient();
 
     public void ApplyTo(TextMeshProUGUI targetText)
     {
+        if (targetText == null) return;
+
         Material mat = new Material(targetText.fontMaterial);
 
         // Outline
@@ -38,14 +68,56 @@ public class TMPTextStyle
             mat.SetFloat(ShaderUtilities.ID_OutlineWidth, 0f);
         }
 
-        // Main Text Color
+        // Main Color
         if (mainColor.overrideColor)
         {
             targetText.color = mainColor.color;
         }
 
-        targetText.fontMaterial = mat;
+        // Shadow
+        var shadowComp = targetText.GetComponent<UnityEngine.UI.Shadow>();
+        if (shadow.useShadow)
+        {
+            if (shadowComp == null)
+                shadowComp = targetText.gameObject.AddComponent<UnityEngine.UI.Shadow>();
 
+            shadowComp.effectColor = shadow.shadowColor;
+            shadowComp.effectDistance = shadow.shadowDistance;
+        }
+        else
+        {
+            if (shadowComp != null)
+                GameObject.DestroyImmediate(shadowComp);
+        }
+
+        // Glow (Underlay)
+        if (glow.useGlow)
+        {
+            mat.EnableKeyword("UNDERLAY_ON");
+            mat.SetColor(ShaderUtilities.ID_UnderlayColor, glow.glowColor);
+            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, glow.glowOffset);
+        }
+        else
+        {
+            mat.DisableKeyword("UNDERLAY_ON");
+        }
+
+        // Gradient
+        if (gradient.useGradient)
+        {
+            targetText.enableVertexGradient = true;
+            VertexGradient grad = new VertexGradient(
+                gradient.topColor, gradient.topColor,
+                gradient.bottomColor, gradient.bottomColor
+            );
+            targetText.colorGradient = grad;
+        }
+        else
+        {
+            targetText.enableVertexGradient = false;
+        }
+
+        targetText.fontMaterial = mat;
         targetText.UpdateMeshPadding();
         targetText.SetMaterialDirty();
     }
@@ -67,6 +139,10 @@ public class TMPStyleApplier : MonoBehaviour
     private Material sharedMaterialInstance; // 복사본 머티리얼
 
     private Material originalMaterial; // 리셋할 때 쓸 원본 저장
+
+    [Header("Preset Lock Settings")]
+    public bool isPresetLocked = false;    // Preset Lock
+    public TMPTextStyle backupStyle;       // Backup before applying preset
 
     public void Apply()
     {

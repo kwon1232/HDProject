@@ -7,21 +7,44 @@ public class TMPStyleApplierEditor : Editor
 {
     private Texture2D applyIcon;
 
+    private SerializedProperty targetTextProp;
+    private SerializedProperty styleProp;
+    private SerializedProperty applyLockedProp;
+    private SerializedProperty isPresetLockedProp;
+    private SerializedProperty backupStyleProp;
+
+    // Auto-apply on drop option
+    private static bool autoApplyOnDrop = true;
+
     private void OnEnable()
     {
         applyIcon = EditorGUIUtility.IconContent("d_UnityEditor.AnimationWindow").image as Texture2D;
+
+        targetTextProp = serializedObject.FindProperty("targetText");
+        styleProp = serializedObject.FindProperty("style");
+        applyLockedProp = serializedObject.FindProperty("applyLocked");
+        isPresetLockedProp = serializedObject.FindProperty("isPresetLocked");
+        backupStyleProp = serializedObject.FindProperty("backupStyle");
     }
 
     public override void OnInspectorGUI()
     {
-        DrawDefaultInspector();
+        serializedObject.Update();
+
+        // Draw default properties
+        EditorGUILayout.PropertyField(targetTextProp);
+        EditorGUILayout.PropertyField(styleProp);
+        EditorGUILayout.PropertyField(applyLockedProp);
+        EditorGUILayout.PropertyField(isPresetLockedProp);
 
         TMPStyleApplier applier = (TMPStyleApplier)target;
 
-        GUILayout.Space(10);
+        EditorGUILayout.Space();
         EditorGUILayout.LabelField("Style Tools", EditorStyles.boldLabel);
 
-        GUILayout.Space(5);
+        DrawPresetDragAndDropArea(applier);
+
+        EditorGUILayout.Space();
 
         GUIContent buttonContent = new GUIContent("Apply Style", applyIcon);
 
@@ -32,13 +55,10 @@ public class TMPStyleApplierEditor : Editor
         }
         EditorGUI.EndDisabledGroup();
 
-        GUILayout.Space(10);
-
         if (GUILayout.Button("Apply Once and Lock", GUILayout.Height(30)))
         {
             applier.Apply();
             applier.applyLocked = true;
-            Debug.Log("Apply Once 완료, 잠금되었습니다.");
         }
 
         if (GUILayout.Button("Reset to Default", GUILayout.Height(30)))
@@ -61,15 +81,33 @@ public class TMPStyleApplierEditor : Editor
             }
         }
 
-        GUILayout.Space(20);
+        EditorGUILayout.Space();
 
-        // Batch Apply All 버튼 추가
         EditorGUILayout.LabelField("Batch Tools", EditorStyles.boldLabel);
 
         if (GUILayout.Button("Batch Apply to All Selected", GUILayout.Height(30)))
         {
             BatchApplyToAllSelected();
         }
+
+        EditorGUILayout.Space();
+
+        EditorGUILayout.LabelField("Style Preset Tools", EditorStyles.boldLabel);
+
+        if (GUILayout.Button("Save TMP Style Preset", GUILayout.Height(30)))
+        {
+            SaveTMPStylePreset(applier.style);
+        }
+
+        if (GUILayout.Button("Load TMP Style Preset", GUILayout.Height(30)))
+        {
+            LoadTMPStylePreset(applier.style);
+        }
+
+        EditorGUILayout.Space();
+        autoApplyOnDrop = EditorGUILayout.Toggle("Auto-Apply Style On Drop", autoApplyOnDrop);
+
+        serializedObject.ApplyModifiedProperties();
     }
 
     private void BatchApplyToAllSelected()
@@ -82,7 +120,102 @@ public class TMPStyleApplierEditor : Editor
                 applier.Apply();
             }
         }
+        Debug.Log($"Batch Apply completed for {targets.Length} objects.");
+    }
 
-        Debug.Log($"Batch Apply 완료! 선택된 {targets.Length}개 오브젝트 적용됨");
+    private void SaveTMPStylePreset(TMPTextStyle style)
+    {
+#if UNITY_EDITOR
+        string path = EditorUtility.SaveFilePanelInProject(
+            "Save TMP Style Preset",
+            "NewTMPStyle",
+            "asset",
+            "Save TMP style settings as asset"
+        );
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            TMPTextStyle clone = ScriptableObject.CreateInstance<TMPTextStyle>();
+            EditorUtility.CopySerialized(style, clone);
+            AssetDatabase.CreateAsset(clone, path);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log($"Style preset saved: {path}");
+        }
+#endif
+    }
+
+    private void LoadTMPStylePreset(TMPTextStyle targetStyle)
+    {
+#if UNITY_EDITOR
+        string path = EditorUtility.OpenFilePanel("Load TMP Style Preset", "Assets", "asset");
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            path = FileUtil.GetProjectRelativePath(path);
+            TMPTextStyle loaded = AssetDatabase.LoadAssetAtPath<TMPTextStyle>(path);
+            if (loaded != null)
+            {
+                EditorUtility.CopySerialized(loaded, targetStyle);
+                Debug.Log($"Style preset loaded: {path}");
+            }
+        }
+#endif
+    }
+
+    // Drag & Drop Area
+    private void DrawPresetDragAndDropArea(TMPStyleApplier applier)
+    {
+        Event evt = Event.current;
+        Rect dropArea = GUILayoutUtility.GetRect(0f, 50f, GUILayout.ExpandWidth(true));
+        GUI.Box(dropArea, "Drag & Drop TMP Style Preset Here");
+
+        if (evt.type == EventType.DragUpdated || evt.type == EventType.DragPerform)
+        {
+            if (dropArea.Contains(evt.mousePosition))
+            {
+                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+                if (evt.type == EventType.DragPerform)
+                {
+                    DragAndDrop.AcceptDrag();
+
+                    foreach (var draggedObject in DragAndDrop.objectReferences)
+                    {
+                        TMPTextStyle stylePreset = draggedObject as TMPTextStyle;
+                        if (stylePreset != null)
+                        {
+                            if (applier.isPresetLocked)
+                            {
+                                Debug.LogWarning("Preset is locked. Cannot overwrite. Unlock first to apply new preset.");
+                                continue;
+                            }
+
+                            // Auto backup current style before applying
+                            applier.backupStyle = ScriptableObject.CreateInstance<TMPTextStyle>();
+                            EditorUtility.CopySerialized(applier.style, applier.backupStyle);
+
+                            // Apply new preset
+                            Undo.RecordObject(applier, "Apply TMP Style Preset");
+                            EditorUtility.CopySerialized(stylePreset, applier.style);
+
+                            if (autoApplyOnDrop)
+                            {
+                                applier.Apply();
+                                Debug.Log("Style preset applied automatically on drop.");
+                            }
+                            else
+                            {
+                                Debug.Log("Style preset loaded. Press 'Apply Style' to apply.");
+                            }
+
+                            // Lock after applying
+                            applier.isPresetLocked = true;
+                        }
+                    }
+                }
+                Event.current.Use();
+            }
+        }
     }
 }
