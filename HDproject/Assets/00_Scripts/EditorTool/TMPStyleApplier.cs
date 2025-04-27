@@ -151,6 +151,27 @@ public class TMPStyleApplier : MonoBehaviour
     public TMPTextStyle backupStyle;       // Backup before applying preset
     private TMPTextStyle runtimePreviewStyle;
 
+    private void Awake()
+    {
+        if (targetText == null)
+        {
+            targetText = GetComponent<TextMeshProUGUI>();
+        }
+        if (style == null)
+        {
+            style = ScriptableObject.CreateInstance<TMPTextStyle>();
+        }
+
+        if (originalMaterial == null)
+            originalMaterial = targetText.fontMaterial; 
+
+        if (sharedMaterialInstance == null)
+        {
+            sharedMaterialInstance = new Material(targetText.fontMaterial);
+            targetText.fontMaterial = sharedMaterialInstance;
+        }
+    }
+
     public void Apply()
     {
         if (applyLocked)
@@ -159,10 +180,16 @@ public class TMPStyleApplier : MonoBehaviour
             return;
         }
 
-        if (targetText == null || style == null)
+        if (targetText == null)
+        {
+            targetText = GetComponent<TextMeshProUGUI>();
+        }
+
+        if (style == null)
         {
             style = ScriptableObject.CreateInstance<TMPTextStyle>();
         }
+
 
         if (originalMaterial == null)
             originalMaterial = targetText.fontMaterial; // 원본 백업 (처음 Apply할 때만)
