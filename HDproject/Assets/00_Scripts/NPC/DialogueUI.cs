@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.UI;
@@ -8,44 +9,61 @@ public class DialogueUI : MonoBehaviour
 {
     [Header("UI Components")]
     public TMP_Text dialogueText;
-    public Image fallbackUITextPanel;   
-    public Image portraitImage;       
+    [SerializeField] private Image fallbackUITextPanel;
+    [SerializeField] private Image portraitImage;
+    [SerializeField] private Button closeButton;
 
     [Header("Localization (Optional)")]
     public LocalizedString localizedText;
 
-    private DialogueUI dialogueUI;
+    
+    private static readonly string prefabPath = "UI/UIDialogue";
 
+    public static DialogueUI instance { get; private set; }
 
-    private string prefabPath = "UI/UIDialogue";
-
-    private DialogueUI CreateUIDialogue()
+    /// <summary>
+    /// Resources에서 UIDialogue 프리팹을 불러와 생성
+    /// </summary>
+    public static DialogueUI CreateUIDialogue()
     {
         GameObject prefab = Resources.Load<GameObject>(prefabPath);
         if (prefab == null)
         {
+            Debug.LogWarning($"DialogueUI 프리팹을 찾을 수 없습니다: Resources/{prefabPath}");
             return null;
         }
-        GameObject instance = Instantiate(prefab);
-        dialogueUI = instance.GetComponent<DialogueUI>();
-        return dialogueUI;
 
+        GameObject uiInstance = Instantiate(prefab);
+        DialogueUI createdUI = uiInstance.GetComponent<DialogueUI>();
+        if (createdUI != null)
+        {
+            instance = createdUI;
+            createdUI.Initialize();
+        }
+        return createdUI;
     }
 
     public void Initialize()
     {
-        if (dialogueUI == null) this.CreateUIDialogue();
-
-        // 각종 초기화 세팅 여기서 추가
-    }
-
-    private void OnEnable()
-    {
+        // 초기화 로직
         if (localizedText != null && dialogueText != null)
         {
             localizedText.StringChanged += UpdateLocalizedText;
             localizedText.RefreshString();
         }
+
+        if (closeButton != null && dialogueText != null)
+        {
+            localizedText.StringChanged += UpdateLocalizedText;
+            localizedText.RefreshString();
+        }
+
+        if(closeButton != null)
+        {
+            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.AddListener(Close);
+        }
+        Close(); // 시작 시 비활성화
     }
 
     private void OnDisable()
@@ -62,32 +80,26 @@ public class DialogueUI : MonoBehaviour
             dialogueText.text = translated;
     }
 
-    /// <summary>
-    /// AI 응답이나 수동 대사를 출력 (UI 텍스트만)
-    /// </summary>
-    public void ShowText(string text, Sprite portrait = null)
+    public void ShowText(string text, string portrait = null)
     {
         if (dialogueText != null)
-        {
             dialogueText.text = text;
-        }
 
         if (fallbackUITextPanel != null)
-        {
             fallbackUITextPanel.gameObject.SetActive(true);
-        }
 
         if (portraitImage != null)
         {
-            if (portrait != null)
-            {
-                portraitImage.sprite = portrait;
-                portraitImage.gameObject.SetActive(true);
-            }
-            else
-            {
-                portraitImage.gameObject.SetActive(false); 
-            }
+            Sprite loadedSprite = Resources.Load<Sprite>(portrait);
+            portraitImage.gameObject.SetActive(portrait != null);
         }
+
+        this.gameObject.SetActive(true);
+    }
+
+    public void Close()
+    {
+        this.gameObject.SetActive(false);
+        Destroy(this.gameObject);
     }
 }

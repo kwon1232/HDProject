@@ -7,13 +7,12 @@ public class RayManager : MonoBehaviour
 {
     [SerializeField] private InteractionUI interactionUI;
     [SerializeField] private LayerMask playerLayer;
+    private void Awake()
+    {
+    }
 
     private void Update()
     {
-        if(Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject(0))
-        {
-            interactionUI.DeactiveObject();
-        }
         if(Input.GetMouseButtonDown(1) && !EventSystem.current.IsPointerOverGameObject(0))
         {
             // 0 = 마우스 왼쪽, 1 = 마우스 오른쪽

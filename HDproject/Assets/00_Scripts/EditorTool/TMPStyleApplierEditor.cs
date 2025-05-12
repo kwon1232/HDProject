@@ -1,3 +1,4 @@
+#if UNITY_EDITOR 
 using UnityEngine;
 using UnityEditor;
 using TMPro;
@@ -342,3 +343,5 @@ public class TMPStyleApplierEditor : Editor
 
 
 }
+
+#endif

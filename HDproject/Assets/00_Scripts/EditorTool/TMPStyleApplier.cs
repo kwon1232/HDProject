@@ -1,4 +1,4 @@
-
+#if UNITY_EDITOR 
 using UnityEngine;
 using TMPro;
 using UnityEditor;
@@ -356,3 +356,4 @@ public class TMPStyleApplier : MonoBehaviour
         return null;
     }
 }
+#endif
