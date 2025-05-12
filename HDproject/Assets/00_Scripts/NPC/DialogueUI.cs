@@ -2,16 +2,14 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
-using UnityEngine.UIElements;
-
-
+using UnityEngine.UI;
 
 public class DialogueUI : MonoBehaviour
 {
     [Header("UI Components")]
     public TMP_Text dialogueText;
-    public GameObject fallbackUITextPanel; 
-    public SpeechBubble speechBubblePrefab; 
+    public Image fallbackUITextPanel;   
+    public Image portraitImage;       
 
     [Header("Localization (Optional)")]
     public LocalizedString localizedText;
@@ -25,6 +23,14 @@ public class DialogueUI : MonoBehaviour
         }
     }
 
+    private void OnDisable()
+    {
+        if (localizedText != null)
+        {
+            localizedText.StringChanged -= UpdateLocalizedText;
+        }
+    }
+
     private void UpdateLocalizedText(string translated)
     {
         if (dialogueText != null)
@@ -32,9 +38,9 @@ public class DialogueUI : MonoBehaviour
     }
 
     /// <summary>
-    /// AI 응답이나 수동 대사를 출력 (말풍선 아님)
+    /// AI 응답이나 수동 대사를 출력 (UI 텍스트만)
     /// </summary>
-    public void ShowText(string text)
+    public void ShowText(string text, Sprite portrait = null)
     {
         if (dialogueText != null)
         {
@@ -43,23 +49,20 @@ public class DialogueUI : MonoBehaviour
 
         if (fallbackUITextPanel != null)
         {
-            fallbackUITextPanel.SetActive(true);
+            fallbackUITextPanel.gameObject.SetActive(true);
         }
-    }
 
-    /// <summary>
-    /// NPC 머리 위에 말풍선으로 텍스트 출력
-    /// </summary>
-    public void ShowSpeechBubble(string text, Transform npcTransform)
-    {
-        if (speechBubblePrefab == null || npcTransform == null)
+        if (portraitImage != null)
         {
-            Debug.LogWarning("SpeechBubblePrefab 또는 NPC Transform이 설정되지 않았습니다.");
-            return;
+            if (portrait != null)
+            {
+                portraitImage.sprite = portrait;
+                portraitImage.gameObject.SetActive(true);
+            }
+            else
+            {
+                portraitImage.gameObject.SetActive(false); 
+            }
         }
-
-        SpeechBubble bubble = Instantiate(speechBubblePrefab, transform); // Canvas 아래 생성
-        bubble.target = npcTransform;
-        bubble.SetText(text);
     }
 }
