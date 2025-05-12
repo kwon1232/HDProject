@@ -174,37 +174,38 @@ public class TMPStyleApplier : MonoBehaviour
 
     public void Apply()
     {
-        if (applyLocked)
-        {
-            //Debug.LogWarning("스타일 적용이 잠겨있습니다. Reset을 해야 다시 Apply할 수 있습니다.");
-            return;
-        }
-
+        // 1) 타겟 텍스트가 없으면 아무 것도 안 함
         if (targetText == null)
-        {
-            targetText = GetComponent<TextMeshProUGUI>();
-        }
+            return;
 
+        // 2) fontMaterial이 없으면 sharedMaterial → fontAsset.material 순으로 폴백
+        Material baseMat = targetText.fontMaterial;
+        if (baseMat == null)
+            baseMat = targetText.fontSharedMaterial != null
+                      ? targetText.fontSharedMaterial
+                      : (targetText.font != null
+                         ? targetText.font.material
+                         : null);
+        if (baseMat == null)
+            return;
+
+        // 3) 스타일 ScriptableObject가 없으면 생성
         if (style == null)
-        {
             style = ScriptableObject.CreateInstance<TMPTextStyle>();
-        }
 
-
-        if (originalMaterial == null)
-            originalMaterial = targetText.fontMaterial; // 원본 백업 (처음 Apply할 때만)
-
+        // 4) sharedMaterialInstance가 없으면 baseMat 복사
         if (sharedMaterialInstance == null)
         {
-            sharedMaterialInstance = new Material(targetText.fontMaterial);
+            sharedMaterialInstance = new Material(baseMat);
             targetText.fontMaterial = sharedMaterialInstance;
         }
 
+        // 5) 이제 안전하게 스타일 적용
         ApplyStyleToMaterial(sharedMaterialInstance, targetText);
-
         targetText.UpdateMeshPadding();
         targetText.SetMaterialDirty();
     }
+
 
     private void ApplyStyleToMaterial(Material mat, TextMeshProUGUI text)
     {
@@ -313,14 +314,29 @@ public class TMPStyleApplier : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    void OnValidate()
+    private void OnValidate()
     {
-        if (!Application.isPlaying && !applyLocked)
+        if (Application.isPlaying || applyLocked) return;
+
+        // targetText가 없으면 찾아보고
+        if (targetText == null)
+            targetText = GetComponent<TextMeshProUGUI>();
+        if (targetText == null)
+            return;
+
+        // fontSharedMaterial이 비어 있으면, fontAsset에서 머티리얼 가져오기
+        if (targetText.fontSharedMaterial == null && targetText.font != null)
         {
-            Apply();
+            // font.material 은 TMP_FontAsset에 연결된 기본 머티리얼
+            targetText.fontSharedMaterial = targetText.font.material;
         }
+
+        // fontMaterial getter 쪽이 SharedMaterial을 기반으로 새 인스턴스를 만들기 때문에
+        //    폴백이 완료된 후에 Apply() 호출
+        Apply();
     }
 #endif
+
 
     public TMPTextStyle GetCurrentStyle()
     {
