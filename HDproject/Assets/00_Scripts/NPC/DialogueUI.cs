@@ -14,6 +14,31 @@ public class DialogueUI : MonoBehaviour
     [Header("Localization (Optional)")]
     public LocalizedString localizedText;
 
+    private DialogueUI dialogueUI;
+
+
+    private string prefabPath = "UI/UIDialogue";
+
+    private DialogueUI CreateUIDialogue()
+    {
+        GameObject prefab = Resources.Load<GameObject>(prefabPath);
+        if (prefab == null)
+        {
+            return null;
+        }
+        GameObject instance = Instantiate(prefab);
+        dialogueUI = instance.GetComponent<DialogueUI>();
+        return dialogueUI;
+
+    }
+
+    public void Initialize()
+    {
+        if (dialogueUI == null) this.CreateUIDialogue();
+
+        // 각종 초기화 세팅 여기서 추가
+    }
+
     private void OnEnable()
     {
         if (localizedText != null && dialogueText != null)
