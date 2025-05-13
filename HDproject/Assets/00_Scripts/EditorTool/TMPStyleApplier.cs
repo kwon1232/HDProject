@@ -235,6 +235,7 @@ public class TMPStyleApplier : MonoBehaviour
             targetText.enableVertexGradient = false;
         }
 
+        targetText.fontSharedMaterial = sharedMaterialInstance;
         targetText.UpdateMeshPadding();
         targetText.SetMaterialDirty();
 
@@ -242,7 +243,6 @@ public class TMPStyleApplier : MonoBehaviour
         EditorUtility.SetDirty(targetText);
         EditorSceneManager.MarkSceneDirty(targetText.gameObject.scene);
 #endif
-        targetText.fontSharedMaterial = sharedMaterialInstance;
     }
 
     public void ResetToDefault()
@@ -273,11 +273,18 @@ public class TMPStyleApplier : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    private bool validateScheduled = false;
+
     private void OnValidate()
     {
+        if (validateScheduled) return;
+        validateScheduled = true;
+
         EditorApplication.delayCall += () =>
         {
-            if (this == null) return; // 오브젝트가 사라졌을 수 있음
+            validateScheduled = false;
+
+            if (this == null) return;
             InitializeMaterial();
             Apply();
         };
