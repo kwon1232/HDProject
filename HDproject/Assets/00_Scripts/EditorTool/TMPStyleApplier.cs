@@ -184,21 +184,19 @@ public class TMPStyleApplier : MonoBehaviour
     {
         if (targetText == null || style == null) return;
 
-        Material mat = sharedMaterialInstance;
-
         // Outline 
         if (style.outline.useOutline)
         {
-            mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.useOutline ? style.outline.width : 0f);
-            mat.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
+            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.useOutline ? style.outline.width : 0f);
+            sharedMaterialInstance.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
         }
 
         // Main Color 
         if (style.mainColor.overrideColor)
         {
             targetText.color = style.mainColor.color;
-            mat.SetColor(ShaderUtilities.ID_FaceColor, style.mainColor.color);
-            mat.SetFloat(ShaderUtilities.ID_FaceDilate, style.mainColor.dilate);
+            sharedMaterialInstance.SetColor(ShaderUtilities.ID_FaceColor, style.mainColor.color);
+            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_FaceDilate, style.mainColor.dilate);
         }
 
         // Underlay (Shadow or Glow) 
@@ -206,22 +204,22 @@ public class TMPStyleApplier : MonoBehaviour
 
         if (style.shadow.useShadow)
         {
-            mat.SetColor(ShaderUtilities.ID_UnderlayColor, style.shadow.shadowColor);
-            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, style.shadow.shadowDistance.x);
-            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, style.shadow.shadowDistance.y);
-            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.2f);
+            sharedMaterialInstance.SetColor(ShaderUtilities.ID_UnderlayColor, style.shadow.shadowColor);
+            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, style.shadow.shadowDistance.x);
+            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, style.shadow.shadowDistance.y);
+            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.2f);
             enableUnderlay = true;
         }
         else if (style.glow.useGlow)
         {
-            mat.SetColor(ShaderUtilities.ID_UnderlayColor, style.glow.glowColor);
-            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0f);
-            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, 0f);
-            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style.glow.glowOffset);
+            sharedMaterialInstance.SetColor(ShaderUtilities.ID_UnderlayColor, style.glow.glowColor);
+            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0f);
+            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, 0f);
+            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style.glow.glowOffset);
             enableUnderlay = true;
         }
-        if (enableUnderlay) mat.EnableKeyword("UNDERLAY_ON");
-        else mat.DisableKeyword("UNDERLAY_ON");
+        if (enableUnderlay) sharedMaterialInstance.EnableKeyword("UNDERLAY_ON");
+        else sharedMaterialInstance.DisableKeyword("UNDERLAY_ON");
 
         // Gradient
         if (style.gradient.useGradient)
@@ -237,6 +235,7 @@ public class TMPStyleApplier : MonoBehaviour
             targetText.enableVertexGradient = false;
         }
 
+        targetText.fontSharedMaterial = sharedMaterialInstance;
         targetText.UpdateMeshPadding();
         targetText.SetMaterialDirty();
 
@@ -276,35 +275,37 @@ public class TMPStyleApplier : MonoBehaviour
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        if (Application.isPlaying || applyLocked) return;
-
-        // targetText가 없으면 찾아보고
-        if (targetText == null)
-            targetText = GetComponent<TextMeshProUGUI>();
-        if (targetText == null)
-            return;
-
-        if (sharedMaterialInstance == null && targetText != null)
-            sharedMaterialInstance = new Material(targetText.fontSharedMaterial);
-
-        if (!Application.isPlaying && !applyLocked)
+        EditorApplication.delayCall += () =>
         {
-            if (targetText == null) targetText = GetComponent<TextMeshProUGUI>();
-            if (targetText == null || style == null) return;
-
-            // fontMaterial getter 쪽이 SharedMaterial을 기반으로 새 인스턴스를 만들기 때문에
-            //    폴백이 완료된 후에 Apply() 호출
+            if (this == null) return; // 오브젝트가 사라졌을 수 있음
+            InitializeMaterial();
             Apply();
-        }
-
+        };
     }
 
     private void Reset()
     {
-        targetText = GetComponent<TextMeshProUGUI>();
-        sharedMaterialInstance = new Material(targetText.fontSharedMaterial);
+        if (this == null) return;
+        InitializeMaterial();
+        Apply();
     }
 
+    private void InitializeMaterial()
+    {
+        if (targetText == null)
+            targetText = GetComponent<TextMeshProUGUI>();
+
+        if (originalMaterial == null)
+        {
+            originalMaterial = targetText.fontSharedMaterial;
+            sharedMaterialInstance = originalMaterial;
+        }
+        if (targetText != null && sharedMaterialInstance == null)
+        {
+            sharedMaterialInstance = new Material(targetText.fontSharedMaterial);
+            targetText.fontSharedMaterial = sharedMaterialInstance;
+        }
+    }
 #endif
 
 
