@@ -235,7 +235,6 @@ public class TMPStyleApplier : MonoBehaviour
             targetText.enableVertexGradient = false;
         }
 
-        targetText.fontSharedMaterial = sharedMaterialInstance;
         targetText.UpdateMeshPadding();
         targetText.SetMaterialDirty();
 
@@ -243,6 +242,7 @@ public class TMPStyleApplier : MonoBehaviour
         EditorUtility.SetDirty(targetText);
         EditorSceneManager.MarkSceneDirty(targetText.gameObject.scene);
 #endif
+        targetText.fontSharedMaterial = sharedMaterialInstance;
     }
 
     public void ResetToDefault()
