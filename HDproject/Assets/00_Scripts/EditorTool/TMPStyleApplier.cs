@@ -158,6 +158,7 @@ public class TMPStyleApplier : MonoBehaviour
     public TMPTextStyle backupStyle;       // Backup before applying preset
     private TMPTextStyle runtimePreviewStyle;
 
+
     private void Awake()
     {
         if (targetText == null)
@@ -183,11 +184,14 @@ public class TMPStyleApplier : MonoBehaviour
     {
         if (targetText == null || style == null) return;
 
-        Material mat = targetText.fontMaterial;
+        Material mat = sharedMaterialInstance;
 
         // Outline 
-        mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.useOutline ? style.outline.width : 0f);
-        mat.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
+        if (style.outline.useOutline)
+        {
+            mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.useOutline ? style.outline.width : 0f);
+            mat.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
+        }
 
         // Main Color 
         if (style.mainColor.overrideColor)
@@ -280,6 +284,9 @@ public class TMPStyleApplier : MonoBehaviour
         if (targetText == null)
             return;
 
+        if (sharedMaterialInstance == null && targetText != null)
+            sharedMaterialInstance = new Material(targetText.fontSharedMaterial);
+
         if (!Application.isPlaying && !applyLocked)
         {
             if (targetText == null) targetText = GetComponent<TextMeshProUGUI>();
@@ -291,6 +298,13 @@ public class TMPStyleApplier : MonoBehaviour
         }
 
     }
+
+    private void Reset()
+    {
+        targetText = GetComponent<TextMeshProUGUI>();
+        sharedMaterialInstance = new Material(targetText.fontSharedMaterial);
+    }
+
 #endif
 
 
