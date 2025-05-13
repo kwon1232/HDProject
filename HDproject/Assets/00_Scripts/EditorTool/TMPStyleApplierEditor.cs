@@ -318,12 +318,12 @@ public class TMPStyleApplierEditor : Editor
             EditorGUILayout.PropertyField(shadowProp, true);
         }
 
-        //// Glow
-        //var glowProp = styleSO.FindProperty("glow");
-        //if (glowProp != null)
-        //{
-        //    EditorGUILayout.PropertyField(glowProp, true);
-        //}
+        // Glow
+        var glowProp = styleSO.FindProperty("glow");
+        if (glowProp != null)
+        {
+            EditorGUILayout.PropertyField(glowProp, true);
+        }
 
         // Gradient
         var gradientProp = styleSO.FindProperty("gradient");

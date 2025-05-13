@@ -5,83 +5,103 @@ public class NPCInteraction : MonoBehaviour
 {
     public static NPCInteraction instance { get; private set; }
 
-    // 엑셀 만들고 DB로 따로 빼서 캐릭터 타입에 따라 나누기 현재는 기능 프로토 타입
-    public string concept = "너는 중독되어 괴로워하는 NPC야. 독에 중독되어 말할 때마다 고통스러워하고, 숨이 차. 하지만 간신히 플레이어에게 부탁하려 해. 상황은 심각하고 절박해. 말투는 헐떡이며 짧게 끊기는 느낌.";
-    public string prompt = "플레이어가 다가왔어. 말을 걸어, 너는 퀘스트안내  NPC야, 퀘스트 안내를 해줘 퀘스트 내용은 몬스터를 처치해서 해독제 2개를 구해오는 거야 이 내용을 말 걸 때마다 컨셉에 맞게 말해줘";
+    [TextArea(6, 12)]
+    public string concept = @"
+Name: Bertolt
+Status: A former miner who once toiled deep underground.
+Background: Sacrificed in an alchemist’s forbidden experiment and now poisoned by a deadly toxin. Every time he speaks, his whole body trembles and he gasps as if his lungs are aflame. He begs his comrade—the player—for an antidote.
+Appearance: His skin is pale and covered in toxic rashes, shoulders slumped as if all strength has drained away.
+Voice: Each sentence is cut short by ragged breaths and sighs. He speaks desperately yet resolutely, but never more than three sentences at a time.
+Goal: With his last ounce of strength, he pleads with the player to defeat monsters and bring back two antidotes.
+".Trim();
+
+    [TextArea(6, 12)]
+    public string prompt = @"
+When the player approaches, stay in character as Bertolt and:
+1) Speak in no more than two sentences.
+2) Maintain the desperate yet taciturn resolve of a miner.
+3) Deliver the quest: 'Defeat monsters and bring back two antidotes.'
+4) Always address the player as 'friend'.
+5) Prefix each line of dialogue with the tag 'start NPC descript'.
+6) After the dialogue, append the tag 'end NPC descript'.
+7) Do not include any internal thoughts, analysis, or <think> blocks—only output the NPC’s spoken lines between the start/end tags.
+8) Output only the NPC’s dialogue lines; omit any player lines or narration.
+9) Each NPC dialogue line must consist of no more than 5 sentences.
+10) **Do not output the tags `start NPC descript` or `end NPC descript`. Only return the spoken lines themselves.**
+".Trim();
 
     [SerializeField] private LayerMask npcLayerMask;
-    
-    public LocalLLMChatManager chatManager;
+    [SerializeField] private LocalLLMChatManager chatManager;
+    [SerializeField] private EmbeddingManager embeddingManager;
 
     private DialogueUI dialogueUI;
 
-    /// <summary>
-    /// Create NPCInteraction Instance 
-    /// </summary>
-    public NPCInteraction GetInstanceNPCInteraction()
-    {
-        if (instance)
-        {
-            instance.Initialize();
-            return instance;
-        }
-
-        instance = this;
-        instance.Initialize();
-        return instance;
-    }
-
-    public void Initialize()
-    {
-        if (!dialogueUI)
-            dialogueUI = DialogueUI.CreateUIDialogue();
-        npcLayerMask = LayerMask.GetMask("NPC");
-    }
-
-    public DialogueUI GetDialogueUI()
-    {
-        return dialogueUI;
-    }
     private void Awake()
     {
-        GetInstanceNPCInteraction();
+        if (instance == null)
+        {
+            instance = this;
+            Initialize();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void Initialize()
+    {
+        if (dialogueUI == null)
+            dialogueUI = DialogueUI.CreateUIDialogue();
+
+        npcLayerMask = LayerMask.GetMask("NPC");
     }
 
     private void Update()
     {
-        HandleRightClickForNPC();
+        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+            TryInteract();
     }
 
-    /// <summary>
-    /// 우클릭 + UI 위가 아닐 때 NPC 레이캐스트 처리
-    /// </summary>
-    public void HandleRightClickForNPC()
+    private void TryInteract()
     {
-        if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, npcLayerMask))
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, npcLayerMask))
-            {
-                NPCInteraction interaction = hit.collider.GetComponent<NPCInteraction>();
-                if (interaction != null && interaction.name == instance.name)
-                {
-                    HandleInteraction();
-                }
-            }
+            if (hit.collider.GetComponent<NPCInteraction>() == this)
+                HandleInteraction();
         }
     }
-
 
     private void HandleInteraction()
     {
-        if (chatManager != null)
+        if (embeddingManager != null)
         {
-            StartCoroutine(chatManager.SendPrompt(concept, prompt, null));
+            StartCoroutine(embeddingManager.RequestEmbeddings(concept, prompt, (float[][] vectors) =>
+            {
+                if (vectors != null && vectors.Length > 0 && vectors[0] != null)
+                {
+                    Debug.Log($"[Embedding] concept 벡터 길이: {vectors[0].Length}");
+                    // 원하면 임베딩 결과도 UI로 보여줄 수 있습니다.
+                    // dialogueUI.PlayDialogue(new[] { $"Embedding length: {vectors[0].Length}" }, null);
+                }
+                else
+                {
+                    Debug.LogWarning("임베딩에 실패했습니다.");
+                }
+            }));
         }
-        else
+
+        else if (chatManager)
         {
-            Debug.LogWarning("ChatManager가 연결되지 않았습니다.");
+            // 2) LLM 대화 요청
+            StartCoroutine(chatManager.SendPrompt(concept, prompt, reply =>
+            {
+                Debug.Log("[Chat] NPC replied: " + reply);
+            }));
         }
     }
+
+    public DialogueUI GetDialogueUI() => dialogueUI;
 }
+

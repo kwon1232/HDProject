@@ -3,6 +3,7 @@ using UnityEngine;
 using TMPro;
 using UnityEditor;
 using System;
+using UnityEditor.SceneManagement;
 
 [System.Serializable]
 public class TMPStyleOutline
@@ -119,6 +120,8 @@ public class TMPTextStyle : ScriptableObject
             targetText.enableVertexGradient = false;
         }
 
+
+
         targetText.fontMaterial = mat;
         targetText.UpdateMeshPadding();
         targetText.SetMaterialDirty();
@@ -174,63 +177,22 @@ public class TMPStyleApplier : MonoBehaviour
 
     public void Apply()
     {
-        // 1) 타겟 텍스트가 없으면 아무 것도 안 함
-        if (targetText == null)
-            return;
+        if (targetText == null || style == null) return;
 
-        // 2) fontMaterial이 없으면 sharedMaterial → fontAsset.material 순으로 폴백
-        Material baseMat = targetText.fontMaterial;
-        if (baseMat == null)
-            baseMat = targetText.fontSharedMaterial != null
-                      ? targetText.fontSharedMaterial
-                      : (targetText.font != null
-                         ? targetText.font.material
-                         : null);
-        if (baseMat == null)
-            return;
+        Material mat = targetText.fontMaterial = new Material(targetText.fontMaterial);
 
-        // 3) 스타일 ScriptableObject가 없으면 생성
-        if (style == null)
-            style = ScriptableObject.CreateInstance<TMPTextStyle>();
+        // Outline 
+        mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.useOutline ? style.outline.width : 0f);
+        mat.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
 
-        // 4) sharedMaterialInstance가 없으면 baseMat 복사
-        if (sharedMaterialInstance == null)
-        {
-            sharedMaterialInstance = new Material(baseMat);
-            targetText.fontMaterial = sharedMaterialInstance;
-        }
-
-        // 5) 이제 안전하게 스타일 적용
-        ApplyStyleToMaterial(sharedMaterialInstance, targetText);
-        targetText.UpdateMeshPadding();
-        targetText.SetMaterialDirty();
-    }
-
-
-    private void ApplyStyleToMaterial(Material mat, TextMeshProUGUI text)
-    {
-        if (mat == null || text == null) return;
-
-        // 1. Outline
-        if (style.outline.useOutline)
-        {
-            mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.width);
-            mat.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
-            mat.EnableKeyword("OUTLINE_ON");
-        }
-        else
-        {
-            mat.SetFloat(ShaderUtilities.ID_OutlineWidth, 0f);
-            mat.DisableKeyword("OUTLINE_ON");
-        }
-
-        // 2. Main Color
+        // Main Color 
         if (style.mainColor.overrideColor)
         {
-            text.color = style.mainColor.color;
+            targetText.color = style.mainColor.color;
+            mat.SetColor(ShaderUtilities.ID_FaceColor, style.mainColor.color);
         }
 
-        // 3. Shadow or Glow (Underlay 통합 처리)
+        // Underlay (Shadow or Glow) 
         bool enableUnderlay = false;
 
         if (style.shadow.useShadow)
@@ -238,7 +200,7 @@ public class TMPStyleApplier : MonoBehaviour
             mat.SetColor(ShaderUtilities.ID_UnderlayColor, style.shadow.shadowColor);
             mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, style.shadow.shadowDistance.x);
             mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, style.shadow.shadowDistance.y);
-            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.2f); // 쉐도우는 약간 소프트
+            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.2f);
             enableUnderlay = true;
         }
         else if (style.glow.useGlow)
@@ -246,53 +208,42 @@ public class TMPStyleApplier : MonoBehaviour
             mat.SetColor(ShaderUtilities.ID_UnderlayColor, style.glow.glowColor);
             mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0f);
             mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, 0f);
-            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style.glow.glowOffset); // 글로우는 부드럽게
+            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style.glow.glowOffset);
             enableUnderlay = true;
         }
+        if (enableUnderlay) mat.EnableKeyword("UNDERLAY_ON");
+        else mat.DisableKeyword("UNDERLAY_ON");
 
-        if (enableUnderlay)
-            mat.EnableKeyword("UNDERLAY_ON");
-        else
-            mat.DisableKeyword("UNDERLAY_ON");
-
-        // 4. Gradient
+        // Gradient
         if (style.gradient.useGradient)
         {
-            text.enableVertexGradient = true;
-            text.colorGradient = new VertexGradient(
-                style.gradient.topColor,
-                style.gradient.topColor,
-                style.gradient.bottomColor,
-                style.gradient.bottomColor
+            targetText.enableVertexGradient = true;
+            targetText.colorGradient = new VertexGradient(
+                style.gradient.topColor, style.gradient.topColor,
+                style.gradient.bottomColor, style.gradient.bottomColor
             );
         }
         else
         {
-            text.enableVertexGradient = false;
+            targetText.enableVertexGradient = false;
         }
 
-        // 최종 적용
-        text.fontMaterial = mat;
-        text.UpdateMeshPadding();
-        text.SetMaterialDirty();
-    }
+        targetText.UpdateMeshPadding();
+        targetText.SetMaterialDirty();
 
+#if UNITY_EDITOR
+        EditorUtility.SetDirty(targetText);
+        EditorSceneManager.MarkSceneDirty(targetText.gameObject.scene);
+#endif
+    }
 
     public void ResetToDefault()
     {
-        if (targetText == null || originalMaterial == null)
-        {
-            //Debug.LogWarning("Reset할 원본 머티리얼이 없습니다.");
-            return;
-        }
+        if (originalMaterial == null || targetText == null) return;
 
         targetText.fontMaterial = originalMaterial;
         targetText.UpdateMeshPadding();
         targetText.SetMaterialDirty();
-        sharedMaterialInstance = null;
-        applyLocked = false;
-
-        //Debug.Log("원본 머티리얼로 복원 완료!");
     }
 
     public void SaveMaterialAsAsset(string path)
@@ -324,16 +275,16 @@ public class TMPStyleApplier : MonoBehaviour
         if (targetText == null)
             return;
 
-        // fontSharedMaterial이 비어 있으면, fontAsset에서 머티리얼 가져오기
-        if (targetText.fontSharedMaterial == null && targetText.font != null)
+        if (!Application.isPlaying && !applyLocked)
         {
-            // font.material 은 TMP_FontAsset에 연결된 기본 머티리얼
-            targetText.fontSharedMaterial = targetText.font.material;
+            if (targetText == null) targetText = GetComponent<TextMeshProUGUI>();
+            if (targetText == null || style == null) return;
+
+            // fontMaterial getter 쪽이 SharedMaterial을 기반으로 새 인스턴스를 만들기 때문에
+            //    폴백이 완료된 후에 Apply() 호출
+            Apply();
         }
 
-        // fontMaterial getter 쪽이 SharedMaterial을 기반으로 새 인스턴스를 만들기 때문에
-        //    폴백이 완료된 후에 Apply() 호출
-        Apply();
     }
 #endif
 
