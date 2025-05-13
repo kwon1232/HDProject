@@ -14,6 +14,7 @@ public class TMPStyleApplierEditor : Editor
     private SerializedProperty applyLockedProp;
     private SerializedProperty isPresetLockedProp;
     private SerializedProperty backupStyleProp;
+    private SerializedProperty sharedMaterialInstance;
     TMPStyleApplier applier;
     TMPTextStyle currentStyle;
 
@@ -29,7 +30,7 @@ public class TMPStyleApplierEditor : Editor
         applyLockedProp = serializedObject.FindProperty("applyLocked");
         isPresetLockedProp = serializedObject.FindProperty("isPresetLocked");
         backupStyleProp = serializedObject.FindProperty("backupStyle");
-
+        sharedMaterialInstance = serializedObject.FindProperty("sharedMaterialInstance");
         applier = (TMPStyleApplier)target;
         currentStyle = applier.GetCurrentStyle();  // style 연결되어 있거나 없으면 생성
     }

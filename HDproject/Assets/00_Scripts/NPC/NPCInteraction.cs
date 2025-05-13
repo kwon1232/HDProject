@@ -17,17 +17,17 @@ Goal: With his last ounce of strength, he pleads with the player to defeat monst
 
     [TextArea(6, 12)]
     public string prompt = @"
-When the player approaches, stay in character as Bertolt and:
-1) Speak in no more than two sentences.
-2) Maintain the desperate yet taciturn resolve of a miner.
-3) Deliver the quest: 'Defeat monsters and bring back two antidotes.'
-4) Always address the player as 'friend'.
-5) Prefix each line of dialogue with the tag 'start NPC descript'.
-6) After the dialogue, append the tag 'end NPC descript'.
-7) Do not include any internal thoughts, analysis, or <think> blocks—only output the NPC’s spoken lines between the start/end tags.
-8) Output only the NPC’s dialogue lines; omit any player lines or narration.
-9) Each NPC dialogue line must consist of no more than 5 sentences.
-10) **Do not output the tags `start NPC descript` or `end NPC descript`. Only return the spoken lines themselves.**
+Keep the Bertolt character:
+1) Speak in two sentences or less.
+2) Keep the miner's desperate yet tacit determination.
+3) Deliver the quest: 'Defeat the Monster and bring two antidotes.'
+4) Always call the player a 'friend'.
+5) Tag [start NPC descript] before each NPC line.
+6) Please add the [end NPC descript] tag after each NPC line.
+7) Don't include any internal thoughts, analyses, or <thinking> blocks, just output the NPC's voice lines between the start/end tags.
+8) Just print out the NPC's lines, skip the player lines or narrations.
+9) Each NPC dialog line should consist of a maximum of 5 sentences.
+10) **Do not print the tag 'Start NPC Description' or 'End NPC Description' only returns the voice lines themselves.**.
 ".Trim();
 
     [SerializeField] private LayerMask npcLayerMask;
@@ -77,19 +77,19 @@ When the player approaches, stay in character as Bertolt and:
     {
         if (embeddingManager != null)
         {
-            StartCoroutine(embeddingManager.RequestEmbeddings(concept, prompt, (float[][] vectors) =>
-            {
-                if (vectors != null && vectors.Length > 0 && vectors[0] != null)
-                {
-                    Debug.Log($"[Embedding] concept 벡터 길이: {vectors[0].Length}");
-                    // 원하면 임베딩 결과도 UI로 보여줄 수 있습니다.
-                    // dialogueUI.PlayDialogue(new[] { $"Embedding length: {vectors[0].Length}" }, null);
-                }
-                else
-                {
-                    Debug.LogWarning("임베딩에 실패했습니다.");
-                }
-            }));
+            //StartCoroutine(embeddingManager.RequestEmbeddings(concept, prompt, (float[][] vectors) =>
+            //{
+            //    if (vectors != null && vectors.Length > 0 && vectors[0] != null)
+            //    {
+            //        Debug.Log($"[Embedding] concept 벡터 길이: {vectors[0].Length}");
+            //        // 원하면 임베딩 결과도 UI로 보여줄 수 있습니다.
+            //        // dialogueUI.PlayDialogue(new[] { $"Embedding length: {vectors[0].Length}" }, null);
+            //    }
+            //    else
+            //    {
+            //        Debug.LogWarning("임베딩에 실패했습니다.");
+            //    }
+            //}));
         }
 
         else if (chatManager)

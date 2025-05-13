@@ -49,7 +49,7 @@ public class DialogueUI : MonoBehaviour
     /// <summary>
     /// 현재 인덱스에 해당하는 대사를 화면에 출력
     /// </summary>
-    private void ShowLine()
+    public void ShowLine()
     {
         if (dialogueText != null)
             dialogueText.text = lines[currentIndex];    

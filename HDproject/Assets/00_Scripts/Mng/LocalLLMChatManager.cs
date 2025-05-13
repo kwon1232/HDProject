@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 public class LocalLLMChatManager : MonoBehaviour
 {
     [Header("Model Server Settings")]
-    public const string apiUrl = "http://192.168.55.182:1234/v1/chat/completions";
+    public const string apiUrl = "http://localhost:1234/v1/chat/completions";
 
     [SerializeField] private NPCInteraction npcInteraction;
 
@@ -18,8 +18,8 @@ public class LocalLLMChatManager : MonoBehaviour
         {
             ""model"" : ""deepseek-r1-distill-qwen-7b"",
             ""messages"": [
-                { ""role"": ""system"",  ""content"": """ + EscapeForJson(concept) + @""" },
-                { ""role"": ""user"",    ""content"": """ + EscapeForJson(prompt) + @""" }
+                { ""role"": ""system"",  ""content"": """ + EscapeForJson(prompt) + @""" },
+                { ""role"": ""user"",    ""content"": """ + EscapeForJson(concept) + @""" }
             ]
         }";
 
@@ -44,12 +44,7 @@ public class LocalLLMChatManager : MonoBehaviour
         }
         else
         {
-            string[] lines = new string[1];
-            string str = "에러: " + request.error;
-            lines.AddRange(str);
-            
             Debug.LogError(request.error);
-            npcInteraction.GetDialogueUI().PlayDialogue(lines, null);
             value?.Invoke(null);
         }
     }
@@ -66,8 +61,8 @@ public class LocalLLMChatManager : MonoBehaviour
         if (t0 >= 0 && t1 > t0)
             content = content.Remove(t0, t1 + 8 - t0);
 
-        const string startTag = "start NPC descript";
-        const string endTag = "end NPC descript";
+        const string startTag = "[start NPC descript]";
+        const string endTag = "[end NPC descript]";
 
         // 최초 startTag 위치, 마지막 endTag 위치 찾기
         int start = content.IndexOf(startTag, StringComparison.OrdinalIgnoreCase);
@@ -96,7 +91,8 @@ public class LocalLLMChatManager : MonoBehaviour
         return s.Replace("\\", "\\\\")
                 .Replace("\"", "\\\"")
                 .Replace("\n", "\\n")
-                .Replace("\r", "\\r");
+                .Replace("\r", "\\r")
+                .Replace("*","**");
     }
 
     [Serializable] private class ChatResponseWrapper { public Choice[] choices; }

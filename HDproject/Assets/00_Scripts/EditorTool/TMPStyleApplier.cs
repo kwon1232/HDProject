@@ -11,6 +11,7 @@ public class TMPStyleOutline
 {
     public bool useOutline = true;
     [Range(0, 1)] public float width = 0.1f;
+    [Range(0, 1)] public float dilate = 0.1f;
     public Color color = Color.black;
 }
 
@@ -19,7 +20,7 @@ public class TMPStyleMainColor
 {
     public bool overrideColor = false;
     public Color color = Color.white;
-    [Range(-1f, 1f)] public float dilate = 0f;
+    [Range(0, 1)] public float softness = 0.1f;
 }
 
 [System.Serializable]
@@ -65,6 +66,7 @@ public class TMPTextStyle : ScriptableObject
         // Outline
         if (outline.useOutline)
         {
+            mat.SetFloat(ShaderUtilities.ID_FaceDilate, outline.dilate);
             mat.SetFloat(ShaderUtilities.ID_OutlineWidth, outline.width);
             mat.SetColor(ShaderUtilities.ID_OutlineColor, outline.color);
         }
@@ -78,7 +80,7 @@ public class TMPTextStyle : ScriptableObject
         {
             targetText.color = mainColor.color;
             mat.SetColor(ShaderUtilities.ID_MainTex, mainColor.color);
-            mat.SetFloat(ShaderUtilities.ID_FaceDilate, mainColor.dilate);  
+            mat.SetFloat(ShaderUtilities.ID_FaceDilate, mainColor.softness);
         }
 
         // Shadow
@@ -173,7 +175,7 @@ public class TMPStyleApplier : MonoBehaviour
         if (originalMaterial == null)
             originalMaterial = targetText.fontMaterial; 
 
-        if (sharedMaterialInstance == null)
+        if (originalMaterial == null && sharedMaterialInstance == null)
         {
             sharedMaterialInstance = new Material(targetText.fontMaterial);
             targetText.fontMaterial = sharedMaterialInstance;
@@ -183,20 +185,21 @@ public class TMPStyleApplier : MonoBehaviour
     public void Apply()
     {
         if (targetText == null || style == null) return;
-
+        Material mat = targetText.fontMaterial;
         // Outline 
         if (style.outline.useOutline)
         {
-            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.useOutline ? style.outline.width : 0f);
-            sharedMaterialInstance.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
+            mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.useOutline ? style.outline.width : 0f);
+            mat.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
+            mat.SetFloat(ShaderUtilities.ID_FaceDilate, style.outline.dilate);
         }
 
         // Main Color 
         if (style.mainColor.overrideColor)
         {
             targetText.color = style.mainColor.color;
-            sharedMaterialInstance.SetColor(ShaderUtilities.ID_FaceColor, style.mainColor.color);
-            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_FaceDilate, style.mainColor.dilate);
+            mat.SetColor(ShaderUtilities.ID_FaceColor, style.mainColor.color);
+            mat.SetFloat(ShaderUtilities.ID_FaceDilate, style.mainColor.softness);
         }
 
         // Underlay (Shadow or Glow) 
@@ -204,22 +207,21 @@ public class TMPStyleApplier : MonoBehaviour
 
         if (style.shadow.useShadow)
         {
-            sharedMaterialInstance.SetColor(ShaderUtilities.ID_UnderlayColor, style.shadow.shadowColor);
-            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, style.shadow.shadowDistance.x);
-            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, style.shadow.shadowDistance.y);
-            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.2f);
+            mat.SetColor(ShaderUtilities.ID_UnderlayColor, style.shadow.shadowColor);
+            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, style.shadow.shadowDistance.x);
+            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, style.shadow.shadowDistance.y);
             enableUnderlay = true;
         }
         else if (style.glow.useGlow)
         {
-            sharedMaterialInstance.SetColor(ShaderUtilities.ID_UnderlayColor, style.glow.glowColor);
-            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0f);
-            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, 0f);
-            sharedMaterialInstance.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style.glow.glowOffset);
+            mat.SetColor(ShaderUtilities.ID_UnderlayColor, style.glow.glowColor);
+            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0f);
+            mat.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, 0f);
+            mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style.glow.glowOffset);
             enableUnderlay = true;
         }
-        if (enableUnderlay) sharedMaterialInstance.EnableKeyword("UNDERLAY_ON");
-        else sharedMaterialInstance.DisableKeyword("UNDERLAY_ON");
+        if (enableUnderlay) mat.EnableKeyword("UNDERLAY_ON");
+        else mat.DisableKeyword("UNDERLAY_ON");
 
         // Gradient
         if (style.gradient.useGradient)
@@ -235,27 +237,24 @@ public class TMPStyleApplier : MonoBehaviour
             targetText.enableVertexGradient = false;
         }
 
-        targetText.fontSharedMaterial = sharedMaterialInstance;
         targetText.UpdateMeshPadding();
         targetText.SetMaterialDirty();
+        targetText.ForceMeshUpdate();
 
-#if UNITY_EDITOR
-        EditorUtility.SetDirty(targetText);
-        EditorSceneManager.MarkSceneDirty(targetText.gameObject.scene);
-#endif
     }
 
     public void ResetToDefault()
     {
         if (originalMaterial == null || targetText == null) return;
 
-        targetText.fontMaterial = originalMaterial;
+        targetText.font.material = originalMaterial;
         targetText.UpdateMeshPadding();
         targetText.SetMaterialDirty();
     }
 
     public void SaveMaterialAsAsset(string path)
     {
+        sharedMaterialInstance = targetText.font.material;
         if (sharedMaterialInstance == null)
         {
             //Debug.LogWarning("저장할 머티리얼이 없습니다. 먼저 Apply를 해주세요.");
@@ -272,7 +271,6 @@ public class TMPStyleApplier : MonoBehaviour
 #endif
     }
 
-#if UNITY_EDITOR
     private bool validateScheduled = false;
 
     private void OnValidate()
@@ -302,18 +300,17 @@ public class TMPStyleApplier : MonoBehaviour
         if (targetText == null)
             targetText = GetComponent<TextMeshProUGUI>();
 
-        if (originalMaterial == null)
+        if (originalMaterial == null && targetText.font.material != null)
         {
-            originalMaterial = targetText.fontSharedMaterial;
+            originalMaterial = targetText.font.material;
             sharedMaterialInstance = originalMaterial;
         }
-        if (targetText != null && sharedMaterialInstance == null)
+        if (targetText != null && sharedMaterialInstance == null && targetText.font.material != null && originalMaterial == null)
         {
-            sharedMaterialInstance = new Material(targetText.fontSharedMaterial);
-            targetText.fontSharedMaterial = sharedMaterialInstance;
+            sharedMaterialInstance = new Material(targetText.font.material);
+            targetText.font.material = sharedMaterialInstance;
         }
     }
-#endif
 
 
     public TMPTextStyle GetCurrentStyle()
@@ -321,7 +318,7 @@ public class TMPStyleApplier : MonoBehaviour
         if (style != null)
             return style;
 
-#if UNITY_EDITOR
+
         if (!Application.isPlaying)
         {
             Undo.RecordObject(this, "Create TMP Preview Style"); // Undo 지원
@@ -329,7 +326,6 @@ public class TMPStyleApplier : MonoBehaviour
             style.name = "(Runtime Preview Style)";
             return style;
         }
-#endif
 
         return null;
     }
