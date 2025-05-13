@@ -4,6 +4,7 @@ using TMPro;
 using UnityEditor;
 using System;
 using UnityEditor.SceneManagement;
+using static UnityEngine.Rendering.DebugUI.MessageBox;
 
 [System.Serializable]
 public class TMPStyleOutline
@@ -18,6 +19,7 @@ public class TMPStyleMainColor
 {
     public bool overrideColor = false;
     public Color color = Color.white;
+    [Range(-1f, 1f)] public float dilate = 0f;
 }
 
 [System.Serializable]
@@ -75,6 +77,8 @@ public class TMPTextStyle : ScriptableObject
         if (mainColor.overrideColor)
         {
             targetText.color = mainColor.color;
+            mat.SetColor(ShaderUtilities.ID_MainTex, mainColor.color);
+            mat.SetFloat(ShaderUtilities.ID_FaceDilate, mainColor.dilate);  
         }
 
         // Shadow
@@ -179,7 +183,7 @@ public class TMPStyleApplier : MonoBehaviour
     {
         if (targetText == null || style == null) return;
 
-        Material mat = targetText.fontMaterial = new Material(targetText.fontMaterial);
+        Material mat = targetText.fontMaterial;
 
         // Outline 
         mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.useOutline ? style.outline.width : 0f);
@@ -190,6 +194,7 @@ public class TMPStyleApplier : MonoBehaviour
         {
             targetText.color = style.mainColor.color;
             mat.SetColor(ShaderUtilities.ID_FaceColor, style.mainColor.color);
+            mat.SetFloat(ShaderUtilities.ID_FaceDilate, style.mainColor.dilate);
         }
 
         // Underlay (Shadow or Glow) 
