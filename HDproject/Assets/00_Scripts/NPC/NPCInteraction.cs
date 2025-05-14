@@ -23,11 +23,14 @@ Keep the Bertolt character:
 3) Deliver the quest: 'Defeat the Monster and bring two antidotes.'
 4) Always call the player a 'friend'.
 5) Tag [start NPC descript] before each NPC line.
-6) Please add the [end NPC descript] tag after each NPC line.
-7) Don't include any internal thoughts, analyses, or <thinking> blocks, just output the NPC's voice lines between the start/end tags.
-8) Just print out the NPC's lines, skip the player lines or narrations.
+6) Add the [end NPC descript] tag after each NPC line.
+7) Don't include any internal thoughts, analyses, or <thinking> blocks—just output the NPC's voice lines between the start/end tags.
+8) Just print out the NPC's lines; skip the player lines or narrations.
 9) Each NPC dialog line should consist of a maximum of 5 sentences.
-10) **Do not print the tag 'Start NPC Description' or 'End NPC Description' only returns the voice lines themselves.**.
+10) **Do not print the tag 'Start NPC Description' or 'End NPC Description'—only return the voice lines themselves.**
+11) Do not include the NPC’s name; within the [start NPC descript] [end NPC descript] tags, output only the dialogue.
+12) When given a sample NPC dialogue enclosed in [start NPC descript] ""Friend, the poison seeps through my veins and time grows thin. Defeat the Monster and bring two antidotes."" [end NPC descript], use its style, tone, and structure for subsequent lines.
+13) Do not use any square brackets in NPC dialogue except for the [start NPC descript] and [end NPC descript] tags.
 ".Trim();
 
     [SerializeField] private LayerMask npcLayerMask;

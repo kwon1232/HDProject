@@ -38,7 +38,7 @@ public class DialogueUI : MonoBehaviour
         gameObject.SetActive(true);    
     }
 
-    private void OnNextLine()
+    public void OnNextLine()
     {
         currentIndex++;    // 인덱스를 증가
         if (currentIndex < lines.Length)
@@ -50,23 +50,27 @@ public class DialogueUI : MonoBehaviour
     /// <summary>
     /// 현재 인덱스에 해당하는 대사를 화면에 출력
     /// </summary>
-    public void ShowLine()
+    private void ShowLine()
     {
         if (dialogueText != null)
             dialogueText.text = lines[currentIndex];    
 
         if (fallbackUITextPanel != null)
-            fallbackUITextPanel.gameObject.SetActive(true);    
+            fallbackUITextPanel.gameObject.SetActive(true);
 
+        currentPortraitPath = "Images/NPC/PoisonQuestMinerImage";
         if (!string.IsNullOrEmpty(currentPortraitPath) && portraitImage != null)
         {
-            Sprite sprite = Resources.Load<Sprite>(currentPortraitPath);    
-            if (sprite != null)
+            Image portrait = Resources.Load<Image>(currentPortraitPath);    
+            if (portrait != null)
             {
-                portraitImage.sprite = sprite;    
-  
+                portraitImage = portrait;    
+                portraitImage.gameObject.SetActive(true); 
             }
-            portraitImage.gameObject.SetActive(sprite != null); 
+            else
+            {
+                portraitImage.gameObject.SetActive(false);
+            }
         }
     }
 

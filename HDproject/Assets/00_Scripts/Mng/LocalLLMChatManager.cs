@@ -12,6 +12,7 @@ public class LocalLLMChatManager : MonoBehaviour
 
     [SerializeField] private NPCInteraction npcInteraction;
 
+    // value여기다가 캐릭터 데이터 테이블 정보 넘겨줄 거임
     public IEnumerator SendPrompt(string concept, string prompt, Action<object> value)
     {
         string json = @"
@@ -38,7 +39,7 @@ public class LocalLLMChatManager : MonoBehaviour
 
             // ParseResponse가 string[]을 반환하도록 변경
             string[] lines = ParseResponse(jsonResult);
-            string tempPortraitPath = "/Images/NPC/PoisonQuestMinerImage.png";
+            string tempPortraitPath = "Images/NPC/PoisonQuestMinerImage";
             npcInteraction.GetDialogueUI().PlayDialogue(lines, tempPortraitPath);
             value?.Invoke(lines);
         }
