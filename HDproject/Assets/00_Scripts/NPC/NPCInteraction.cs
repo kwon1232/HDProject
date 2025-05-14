@@ -97,7 +97,7 @@ Keep the Bertolt character:
             // 2) LLM 대화 요청
             StartCoroutine(chatManager.SendPrompt(concept, prompt, reply =>
             {
-                Debug.Log("[Chat] NPC replied: " + reply);
+                Debug.Log(reply);
             }));
         }
     }
