@@ -39,6 +39,7 @@ public class LocalLLMChatManager : MonoBehaviour
 
             // ParseResponse가 string[]을 반환하도록 변경
             string[] lines = ParseResponse(jsonResult);
+            // 나중에 데이터 테이블 만들고 제대로 된 값 설정해주기
             string tempPortraitPath = "Images/NPC/PoisonQuestMinerImage";
             npcInteraction.GetDialogueUI().PlayDialogue(lines, tempPortraitPath);
             value?.Invoke(lines);

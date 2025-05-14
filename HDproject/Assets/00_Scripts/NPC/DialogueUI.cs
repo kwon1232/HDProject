@@ -58,13 +58,12 @@ public class DialogueUI : MonoBehaviour
         if (fallbackUITextPanel != null)
             fallbackUITextPanel.gameObject.SetActive(true);
 
-        currentPortraitPath = "Images/NPC/PoisonQuestMinerImage";
         if (!string.IsNullOrEmpty(currentPortraitPath) && portraitImage != null)
         {
-            Image portrait = Resources.Load<Image>(currentPortraitPath);    
-            if (portrait != null)
+            Sprite portraitSprite = Resources.Load<Sprite>(currentPortraitPath);
+            if (portraitSprite != null)
             {
-                portraitImage = portrait;    
+                portraitImage.sprite = portraitSprite;
                 portraitImage.gameObject.SetActive(true); 
             }
             else
