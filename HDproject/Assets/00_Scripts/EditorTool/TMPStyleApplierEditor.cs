@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 using TMPro;
+using UnityEditor.SceneManagement;
 
 [CanEditMultipleObjects]
 [CustomEditor(typeof(TMPStyleApplier))]
@@ -39,19 +40,34 @@ public class TMPStyleApplierEditor : Editor
     {
         serializedObject.Update();
 
-        // Draw default properties
+        // 기본 속성
         EditorGUILayout.PropertyField(targetTextProp);
         EditorGUILayout.PropertyField(styleProp);
         EditorGUILayout.PropertyField(applyLockedProp);
         EditorGUILayout.PropertyField(isPresetLockedProp);
 
         TMPStyleApplier applier = (TMPStyleApplier)target;
+
+        // Preset Lock 해제 UI
+        if (applier.isPresetLocked)
+        {
+            EditorGUILayout.HelpBox("Style preset is locked. Unlock to apply a new preset.", MessageType.Warning);
+
+            if (GUILayout.Button("Unlock Preset"))
+            {
+                Undo.RecordObject(applier, "Unlock TMP Style Preset");
+                applier.isPresetLocked = false;
+                EditorUtility.SetDirty(applier);
+            }
+        }
+
+        // 스타일 설정 그리기
         DrawStyleSettings();
 
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Style Tools", EditorStyles.boldLabel);
 
-        DrawPresetDragAndDropArea((TMPStyleApplier)target);
+        DrawPresetDragAndDropArea(applier);
 
         EditorGUILayout.Space();
 
@@ -75,7 +91,12 @@ public class TMPStyleApplierEditor : Editor
             applier.ResetToDefault();
         }
 
-        EditorGUILayout.LabelField("Meterial Tools", EditorStyles.boldLabel);
+        if (GUILayout.Button("Apply Style Material Save", GUILayout.Height(30)))
+        {
+            applier.ApplyStyleToOrignalMaterial();
+        }
+
+        EditorGUILayout.LabelField("Material Tools", EditorStyles.boldLabel);
 
         if (GUILayout.Button("Load Material as Asset", GUILayout.Height(30)))
         {
@@ -98,7 +119,6 @@ public class TMPStyleApplierEditor : Editor
         }
 
         EditorGUILayout.Space();
-
         EditorGUILayout.LabelField("Batch Tools", EditorStyles.boldLabel);
 
         if (GUILayout.Button("Batch Apply to All Selected", GUILayout.Height(30)))
@@ -107,7 +127,6 @@ public class TMPStyleApplierEditor : Editor
         }
 
         EditorGUILayout.Space();
-
         EditorGUILayout.LabelField("Style Preset Tools", EditorStyles.boldLabel);
 
         if (GUILayout.Button("Save TMP Style Preset", GUILayout.Height(30)))
@@ -124,12 +143,6 @@ public class TMPStyleApplierEditor : Editor
         autoApplyOnDrop = EditorGUILayout.Toggle("Auto-Apply Style On Drop", autoApplyOnDrop);
 
         serializedObject.ApplyModifiedProperties();
-
-        // 추가: 변경사항 있으면 강제로 Apply()
-        if (!Application.isPlaying && applier.targetText != null && applier.style != null)
-        {
-            applier.Apply();
-        }
     }
 
     private void BatchApplyToAllSelected()
@@ -229,51 +242,62 @@ public class TMPStyleApplierEditor : Editor
         Rect dropArea = GUILayoutUtility.GetRect(0f, 50f, GUILayout.ExpandWidth(true));
         GUI.Box(dropArea, "Drag & Drop TMP Style Preset Here");
 
-        if (evt.type == EventType.DragUpdated || evt.type == EventType.DragPerform)
+        if ((evt.type == EventType.DragUpdated || evt.type == EventType.DragPerform) &&
+            dropArea.Contains(evt.mousePosition))
         {
-            if (dropArea.Contains(evt.mousePosition))
+            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+            if (evt.type == EventType.DragPerform)
             {
-                DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+                DragAndDrop.AcceptDrag();
 
-                if (evt.type == EventType.DragPerform)
+                foreach (var draggedObject in DragAndDrop.objectReferences)
                 {
-                    DragAndDrop.AcceptDrag();
+                    TMPTextStyle droppedStyle = draggedObject as TMPTextStyle;
+                    if (droppedStyle == null) continue;
 
-                    foreach (var draggedObject in DragAndDrop.objectReferences)
+                    if (applier.isPresetLocked)
                     {
-                        TMPTextStyle stylePreset = draggedObject as TMPTextStyle;
-                        if (stylePreset != null)
-                        {
-                            if (applier.isPresetLocked)
-                            {
-                                Debug.LogWarning("Preset is locked. Cannot overwrite. Unlock first to apply new preset.");
-                                continue;
-                            }
+                        Debug.LogWarning("Preset is locked. Unlock to apply a new preset.");
+                        continue;
+                    }
 
-                            // Auto backup current style before applying
-                            applier.backupStyle = ScriptableObject.CreateInstance<TMPTextStyle>();
-                            EditorUtility.CopySerialized(applier.style, applier.backupStyle);
+                    Undo.RecordObject(applier, "Apply TMP Style Preset");
 
-                            // Apply new preset
-                            Undo.RecordObject(applier, "Apply TMP Style Preset");
-                            EditorUtility.CopySerialized(stylePreset, applier.style);
+                    if (applier.style == null)
+                    {
+                        applier.style = ScriptableObject.CreateInstance<TMPTextStyle>();
+                        applier.style.name = "(Runtime Copy)";
+                    }
 
-                            if (autoApplyOnDrop)
-                            {
-                                applier.Apply();
-                                Debug.Log("Style preset applied automatically on drop.");
-                            }
-                            else
-                            {
-                                Debug.Log("Style preset loaded. Press 'Apply Style' to apply.");
-                            }
+                    applier.backupStyle = ScriptableObject.CreateInstance<TMPTextStyle>();
+                    EditorUtility.CopySerialized(applier.style, applier.backupStyle);
 
-                            // Lock after applying
-                            applier.isPresetLocked = true;
-                        }
+                    Undo.RecordObject(applier.style, "Overwrite TMP Style");
+                    EditorUtility.CopySerialized(droppedStyle, applier.style);
+
+                    EditorUtility.SetDirty(applier.style);
+                    EditorUtility.SetDirty(applier);
+
+                    if (autoApplyOnDrop)
+                    {
+                        applier.Apply();
+                        Debug.Log("Style preset applied automatically on drop.");
+                    }
+                    else
+                    {
+                        Debug.Log("Style preset loaded. Press 'Apply Style' to apply.");
+                    }
+
+                    applier.isPresetLocked = true;
+
+                    if (!Application.isPlaying)
+                    {
+                        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(applier.gameObject.scene);
                     }
                 }
-                Event.current.Use();
+
+                evt.Use();
             }
         }
     }
@@ -295,53 +319,48 @@ public class TMPStyleApplierEditor : Editor
         EditorGUILayout.LabelField("Style Settings (Local Preview)", EditorStyles.boldLabel);
 
         styleSO.Update();
+        Undo.RecordObject(currentStyle, "Modify TMP Text Style"); // 🔥 Undo 등록
+
+        EditorGUI.BeginChangeCheck();
 
         // Outline
         var outlineProp = styleSO.FindProperty("outline");
         if (outlineProp != null)
-        {
             EditorGUILayout.PropertyField(outlineProp, true);
-        }
 
         EditorGUILayout.Space();
 
         // Main Color
         var mainColorProp = styleSO.FindProperty("mainColor");
         if (mainColorProp != null)
-        {
             EditorGUILayout.PropertyField(mainColorProp, true);
-        }
 
         // Shadow
         var shadowProp = styleSO.FindProperty("shadow");
         if (shadowProp != null)
-        {
             EditorGUILayout.PropertyField(shadowProp, true);
-        }
 
         // Glow
         var glowProp = styleSO.FindProperty("glow");
         if (glowProp != null)
-        {
             EditorGUILayout.PropertyField(glowProp, true);
-        }
 
         // Gradient
         var gradientProp = styleSO.FindProperty("gradient");
         if (gradientProp != null)
-        {
             EditorGUILayout.PropertyField(gradientProp, true);
-        }
 
-        styleSO.ApplyModifiedProperties();
-
-        // 변경사항 적용 Apply가 모든 처리 담당
-        if (!Application.isPlaying)
+        if (EditorGUI.EndChangeCheck())
         {
+            styleSO.ApplyModifiedProperties();
             applier.Apply();
+            EditorUtility.SetDirty(applier);
+        }
+        else
+        {
+            styleSO.ApplyModifiedProperties();
         }
     }
-
 
 }
 

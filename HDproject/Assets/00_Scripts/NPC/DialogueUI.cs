@@ -8,7 +8,8 @@ using UnityEngine.UI;
 public class DialogueUI : MonoBehaviour
 {
     [Header("UI 구성 요소")]    
-    public TMP_Text dialogueText;    
+    public TMP_Text dialogueText;
+    [SerializeField] private TextMeshProUGUI npcName;
     [SerializeField] private Image fallbackUITextPanel;    
     [SerializeField] private Image portraitImage;    
     [SerializeField] private Button closeButton;

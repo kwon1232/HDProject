@@ -20,7 +20,6 @@ public class TMPStyleMainColor
 {
     public bool overrideColor = false;
     public Color color = Color.white;
-    [Range(0, 1)] public float softness = 0.1f;
 }
 
 [System.Serializable]
@@ -80,7 +79,6 @@ public class TMPTextStyle : ScriptableObject
         {
             targetText.color = mainColor.color;
             mat.SetColor(ShaderUtilities.ID_MainTex, mainColor.color);
-            mat.SetFloat(ShaderUtilities.ID_FaceDilate, mainColor.softness);
         }
 
         // Shadow
@@ -182,27 +180,40 @@ public class TMPStyleApplier : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        if (Application.isPlaying)
+        {
+            Apply();
+        }
+    }
+
     public void Apply()
     {
         if (targetText == null || style == null) return;
+
         Material mat = targetText.fontMaterial;
-        // Outline 
+
+        // Outline
         if (style.outline.useOutline)
         {
-            mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.useOutline ? style.outline.width : 0f);
-            mat.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
+            mat.SetFloat(ShaderUtilities.ID_OutlineWidth, style.outline.width);
             mat.SetFloat(ShaderUtilities.ID_FaceDilate, style.outline.dilate);
+            mat.SetColor(ShaderUtilities.ID_OutlineColor, style.outline.color);
+        }
+        else
+        {
+            mat.SetFloat(ShaderUtilities.ID_OutlineWidth, 0f);
         }
 
-        // Main Color 
+        // Main Color
         if (style.mainColor.overrideColor)
         {
             targetText.color = style.mainColor.color;
             mat.SetColor(ShaderUtilities.ID_FaceColor, style.mainColor.color);
-            mat.SetFloat(ShaderUtilities.ID_FaceDilate, style.mainColor.softness);
         }
 
-        // Underlay (Shadow or Glow) 
+        // Underlay (Shadow or Glow)
         bool enableUnderlay = false;
 
         if (style.shadow.useShadow)
@@ -220,8 +231,11 @@ public class TMPStyleApplier : MonoBehaviour
             mat.SetFloat(ShaderUtilities.ID_UnderlaySoftness, style.glow.glowOffset);
             enableUnderlay = true;
         }
-        if (enableUnderlay) mat.EnableKeyword("UNDERLAY_ON");
-        else mat.DisableKeyword("UNDERLAY_ON");
+
+        if (enableUnderlay)
+            mat.EnableKeyword("UNDERLAY_ON");
+        else
+            mat.DisableKeyword("UNDERLAY_ON");
 
         // Gradient
         if (style.gradient.useGradient)
@@ -237,10 +251,32 @@ public class TMPStyleApplier : MonoBehaviour
             targetText.enableVertexGradient = false;
         }
 
+        targetText.fontMaterial = mat;
+
+
+
         targetText.UpdateMeshPadding();
         targetText.SetMaterialDirty();
         targetText.ForceMeshUpdate();
+    }
 
+    public void ApplyStyleToOrignalMaterial()
+    {
+        if (originalMaterial == null || style == null)
+        {
+            Debug.LogWarning("Original Mererial 또는 Style이 존재하지 않습니다.");
+            return;
+        }
+
+        string assetPath = AssetDatabase.GetAssetPath(originalMaterial);
+        if (string.IsNullOrEmpty(assetPath))
+        {
+            Debug.LogWarning("Original Material이 에셋 파일이 아닙니다. 저장할 수 없습니다.");
+            return;
+        }
+
+        // BackUp
+        string backupPath = assetPath.Replace(".mat", "_Backup.mat");
     }
 
     public void ResetToDefault()
