@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem.HID;
 using UnityEngine.Localization;
 using UnityEngine.UI;
 
@@ -12,8 +13,11 @@ public class DialogueUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI npcName;
     [SerializeField] private Image fallbackUITextPanel;    
     [SerializeField] private Image portraitImage;    
-    [SerializeField] private Button closeButton;
-    [SerializeField] private Button NextButton;
+    [SerializeField] private Button closeBtn;
+    [SerializeField] private Button NextBtn;
+    [SerializeField] private Button yesBtn, noBtn;
+    
+    private const int answerMaxCount = 3;
 
     [Header("Localization (선택)")]
     public LocalizedString localizedText;
@@ -25,6 +29,7 @@ public class DialogueUI : MonoBehaviour
     private string[] lines;       
     private int currentIndex;     
     private string currentPortraitPath;    // 현재 사용할 초상화 리소스 경로를 저장
+
 
     /// <summary>
     /// 외부에서 대사 배열과 초상화 경로를 전달받아 대화를 시작
@@ -40,9 +45,9 @@ public class DialogueUI : MonoBehaviour
 
     public void OnNextLine()
     {
-        currentIndex++;    // 인덱스를 증가
-        if (currentIndex < lines.Length)
+        if (currentIndex < lines.Length-1)
         {
+            currentIndex++;    // 인덱스를 증가
             ShowLine();    // 다음 대사를 표시
         }
     }
@@ -78,14 +83,14 @@ public class DialogueUI : MonoBehaviour
     /// </summary>
     public static DialogueUI CreateUIDialogue()
     {
-        GameObject prefab = Resources.Load<GameObject>(prefabPath);   
-        if (prefab == null)
+        GameObject UIprefab = Resources.Load<GameObject>(prefabPath);   
+        if (UIprefab == null)
         {
             Debug.LogWarning($"Resources/{prefabPath} 경로에서 DialogueUI 프리팹을 찾을 수 없음");
             return null;   
         }
 
-        GameObject uiInstance = Instantiate(prefab);    
+        GameObject uiInstance = Instantiate(UIprefab);    
         DialogueUI createdUI = uiInstance.GetComponent<DialogueUI>();   
 
         Canvas canvas = UIManager.GetCurrentSceneCanvas();   
@@ -119,10 +124,10 @@ public class DialogueUI : MonoBehaviour
             localizedText.RefreshString();    // 초기 문자열을 갱신
         }
 
-        if (closeButton != null)
+        if (closeBtn != null)
         {
-            closeButton.onClick.RemoveAllListeners();    // 기존 리스너를 제거
-            closeButton.onClick.AddListener(OnNextLine);    // 다음 버튼 클릭 시 OnNextLine을 호출
+            closeBtn.onClick.RemoveAllListeners();    // 기존 리스너를 제거
+            closeBtn.onClick.AddListener(OnNextLine);    // 다음 버튼 클릭 시 OnNextLine을 호출
         }
 
         Close();    
