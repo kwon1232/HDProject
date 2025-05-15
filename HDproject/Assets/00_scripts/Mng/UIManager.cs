@@ -8,13 +8,24 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager instance { get; private set; }
     public static Canvas outCanvas { get; private set; }
-
+    public static int maxOrder { get; private set; }
+    public static int minOrder { get; private set; }
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
+        }
+    }
+
+    private void Start()
+    {
+        Canvas[] allCanvas = Object.FindObjectsOfType<Canvas>();
+        foreach (var c in allCanvas)
+        {
+            if (c.sortingOrder > maxOrder) maxOrder = c.sortingOrder;
+            if(c.sortingOrder < minOrder) minOrder = c.sortingOrder;
         }
     }
 
@@ -27,18 +38,25 @@ public class UIManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(canvasName))
         {
+            // 캔버스 이름을 딱히 정하지 않았다면,
             Canvas canvas = Object.FindObjectOfType<Canvas>();
-            if (canvas != null)
+            // DynamicCanvas 이름 체크 후 있다면 리턴
+            if (canvas != null && canvas.gameObject.name == "DynamicCanvas")
                 return canvas;
 
+            // DynamicCanvas 없다면 만들어줌
             return CreateCanvas(canvasName);
         }
 
         Canvas[] allCanvas = Object.FindObjectsOfType<Canvas>();
         foreach (var c in allCanvas)
         {
+            if (c.sortingOrder > maxOrder) maxOrder = c.sortingOrder;
+            if (c.sortingOrder < minOrder) minOrder = c.sortingOrder;
             if (c.gameObject.name == canvasName)
+            {
                 return c;
+            }
         }
         return CreateCanvas(canvasName);
     }
@@ -85,10 +103,10 @@ public class UIManager : MonoBehaviour
     /// </summary>
     private static Canvas CreateCanvas(string canvasName = null)
     {
-        canvasName = string.IsNullOrEmpty(canvasName) ? "Canvas" : canvasName;
+        canvasName = string.IsNullOrEmpty(canvasName) ? "DynamicCanvas" : canvasName;
 
         GameObject canvas = new GameObject(
-            "Canvas",
+            canvasName,
             typeof(Canvas),
             typeof(CanvasScaler),
             typeof(GraphicRaycaster)
