@@ -15,13 +15,13 @@ public class AHUD : MonoBehaviour
             hudRegister[this.gameObject.name] = this;
     }
 
-    public void Initialization(int ZOrderHUD = 0)
+    virtual public void Initialization(int ZOrderHUD = 0)
     {
         if (!hudRegister.ContainsKey(this.gameObject.name))
             hudRegister[this.gameObject.name] = this;
     }
 
-    public Button GetButton (string btnName)
+    virtual public Button GetButton (string btnName)
     {
         if (btnName.IsNullOrEmpty()) { return null; }
 
@@ -32,7 +32,7 @@ public class AHUD : MonoBehaviour
         return null;
     }
 
-    public Image GetImage(string imName)
+    virtual public Image GetImage(string imName)
     {
         if (imName.IsNullOrEmpty()) { return null; }
 
