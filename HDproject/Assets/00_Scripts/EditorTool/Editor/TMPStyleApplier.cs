@@ -5,6 +5,8 @@ using UnityEditor;
 using System;
 using UnityEditor.SceneManagement;
 using static UnityEngine.Rendering.DebugUI.MessageBox;
+using System.Collections.Generic;
+
 
 [System.Serializable]
 public class TMPStyleOutline
