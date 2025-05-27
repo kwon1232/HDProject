@@ -6,7 +6,7 @@ using UnityEditor.SceneManagement;
 
 [CanEditMultipleObjects]
 [CustomEditor(typeof(TMPStyleApplier))]
-public class TMPStyleApplierEditor : Editor
+public class TMPStyleApplierEditor : UnityEditor.Editor
 {
     private Texture2D applyIcon;
 

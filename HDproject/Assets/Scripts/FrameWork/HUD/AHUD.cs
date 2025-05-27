@@ -6,9 +6,9 @@ using WebSocketSharp;
 public class AHUD : MonoBehaviour
 {
     public int ZOrderHUD;
-    public Dictionary<string, AHUD> hudRegister { get; private set; }
+    static public Dictionary<string, AHUD> hudRegister { get; private set; }
 
-    private void Awake()
+    private void Start()
     {
         ZOrderHUD = 0;
         if(!hudRegister.ContainsKey(this.gameObject.name))

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,7 @@ public class UIManager : MonoBehaviour
     public static Canvas outCanvas { get; private set; }
     public static int maxOrder { get; private set; }
     public static int minOrder { get; private set; }
+
     private void Awake()
     {
         if (instance == null)
