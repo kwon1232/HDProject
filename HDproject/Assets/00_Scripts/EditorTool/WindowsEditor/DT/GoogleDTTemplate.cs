@@ -187,6 +187,17 @@ public class GoogleDTTemplate : MonoBehaviour
             AssetDatabase.CreateAsset(asset, assetPath);
             addCount++;
         }
+        // 프로젝트에 저장되어 언제든 에디터/런타임에서 불러올 수 있는 데이터의 단위로 변환한다.
+        /* 변환 이유 :
+         * ScriptableObject도 이런 에셋 형태로 저장하면
+         * 1. 프로젝트 안에서 자산처럼 관리(버전관리, 리팩토링, 검색) 가능
+         * 2. 인스펙터에서 쉽게 확인/수정 가능
+         * 3. 런타임에서 쉽게 로드 및 활용 
+         * ( Resources.Load, Addressables, AssetBundle 등으로
+             빌드 후 게임 실행 중에도 바로 불러와 사용할 수 있음 )
+         * 직접 메모리에 생성하는 것보다
+           이미 저장된 자산을 읽어오는 게 훨씬 쉽고 관리가 쉬움
+         */
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log($"{sheetName} - 신규 ScriptableObject {addCount}개 생성, 이미 있는 데이터는 건너뜀");
