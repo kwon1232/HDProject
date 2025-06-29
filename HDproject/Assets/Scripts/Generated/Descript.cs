@@ -1,20 +1,37 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Descript
 {
-    public string _IDX_;
-    public string _SystemType_;
-    public string _KO_;
-    public string _EN_;
-    public string _JP_;
-    public string _CH_;
+    public int IDX;
+    public string SystemType;
+    public bool KO;
+    public bool EN;
+    public bool JP;
+    public bool CH;
 }
 
 public static class DescriptData
 {
     public static readonly Descript[] Items = new Descript[]
     {
-        new Descript { _IDX_ = "1", _SystemType_ = "Dialogue", _KO_ = "TRUE", _EN_ = "FALSE", _JP_ = "FALSE", _CH_ = "FALSE" },
-        new Descript { _IDX_ = "2", _SystemType_ = "Quest", _KO_ = "TRUE", _EN_ = "FALSE", _JP_ = "FALSE", _CH_ = "FALSE" },
+        new Descript
+        {
+            IDX = 1,
+            SystemType = "Dialogue",
+            KO = true,
+            EN = false,
+            JP = false,
+            CH = false,
+        },
+        new Descript
+        {
+            IDX = 2,
+            SystemType = "Quest",
+            KO = true,
+            EN = false,
+            JP = false,
+            CH = false,
+        },
     };
 }

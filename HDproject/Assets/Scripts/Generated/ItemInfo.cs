@@ -1,30 +1,131 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemInfo
 {
-    public string _IDX_;
-    public string _ItemID_;
-    public string _ItemType_;
-    public string _Grade_;
-    public string _IconPath_;
-    public string _IconFramePath_;
-    public string _PrefabPath_;
-    public string _DescriptID_;
+    public int IDX;
+    public string ItemID;
+    public string ItemType;
+    public string Grade;
+    public string IconPath;
+    public string IconFramePath;
+    public string PrefabPath;
+    public string DescriptID;
 }
 
 public static class ItemInfoData
 {
     public static readonly ItemInfo[] Items = new ItemInfo[]
     {
-        new ItemInfo { _IDX_ = "1", _ItemID_ = "BHPP_A001", _ItemType_ = "Potion", _Grade_ = "Nomal", _IconPath_ = "", _IconFramePath_ = "", _PrefabPath_ = "", _DescriptID_ = "DID0001" },
-        new ItemInfo { _IDX_ = "2", _ItemID_ = "BMPP_A001", _ItemType_ = "Potion", _Grade_ = "Nomal", _IconPath_ = "", _IconFramePath_ = "", _PrefabPath_ = "", _DescriptID_ = "DID0002" },
-        new ItemInfo { _IDX_ = "3", _ItemID_ = "BEPP_A001", _ItemType_ = "Potion", _Grade_ = "Nomal", _IconPath_ = "", _IconFramePath_ = "", _PrefabPath_ = "", _DescriptID_ = "DID0003" },
-        new ItemInfo { _IDX_ = "4", _ItemID_ = "BHPP_A002", _ItemType_ = "Potion", _Grade_ = "Nomal", _IconPath_ = "", _IconFramePath_ = "", _PrefabPath_ = "", _DescriptID_ = "" },
-        new ItemInfo { _IDX_ = "5", _ItemID_ = "BHPP_A003", _ItemType_ = "Potion", _Grade_ = "Nomal", _IconPath_ = "", _IconFramePath_ = "", _PrefabPath_ = "", _DescriptID_ = "" },
-        new ItemInfo { _IDX_ = "6", _ItemID_ = "BHPP_A004", _ItemType_ = "Potion", _Grade_ = "Nomal", _IconPath_ = "", _IconFramePath_ = "", _PrefabPath_ = "", _DescriptID_ = "" },
-        new ItemInfo { _IDX_ = "7", _ItemID_ = "BHPP_A005", _ItemType_ = "Potion", _Grade_ = "Nomal", _IconPath_ = "", _IconFramePath_ = "", _PrefabPath_ = "", _DescriptID_ = "" },
-        new ItemInfo { _IDX_ = "8", _ItemID_ = "BHPP_A006", _ItemType_ = "Potion", _Grade_ = "Nomal", _IconPath_ = "", _IconFramePath_ = "", _PrefabPath_ = "", _DescriptID_ = "" },
-        new ItemInfo { _IDX_ = "9", _ItemID_ = "BHPP_A007", _ItemType_ = "Potion", _Grade_ = "Nomal", _IconPath_ = "", _IconFramePath_ = "", _PrefabPath_ = "", _DescriptID_ = "" },
-        new ItemInfo { _IDX_ = "10", _ItemID_ = "BHPP_A008", _ItemType_ = "Potion", _Grade_ = "Nomal", _IconPath_ = "", _IconFramePath_ = "", _PrefabPath_ = "", _DescriptID_ = "" },
+        new ItemInfo
+        {
+            IDX = 1,
+            ItemID = "BHPP_A001",
+            ItemType = "Potion",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            DescriptID = "DID0001",
+        },
+        new ItemInfo
+        {
+            IDX = 2,
+            ItemID = "BMPP_A001",
+            ItemType = "Potion",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            DescriptID = "DID0002",
+        },
+        new ItemInfo
+        {
+            IDX = 3,
+            ItemID = "BEPP_A001",
+            ItemType = "Potion",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            DescriptID = "DID0003",
+        },
+        new ItemInfo
+        {
+            IDX = 4,
+            ItemID = "BHPP_A002",
+            ItemType = "Potion",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            DescriptID = "",
+        },
+        new ItemInfo
+        {
+            IDX = 5,
+            ItemID = "BHPP_A003",
+            ItemType = "Potion",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            DescriptID = "",
+        },
+        new ItemInfo
+        {
+            IDX = 6,
+            ItemID = "BHPP_A004",
+            ItemType = "Potion",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            DescriptID = "",
+        },
+        new ItemInfo
+        {
+            IDX = 7,
+            ItemID = "BHPP_A005",
+            ItemType = "Potion",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            DescriptID = "",
+        },
+        new ItemInfo
+        {
+            IDX = 8,
+            ItemID = "BHPP_A006",
+            ItemType = "Potion",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            DescriptID = "",
+        },
+        new ItemInfo
+        {
+            IDX = 9,
+            ItemID = "BHPP_A007",
+            ItemType = "Potion",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            DescriptID = "",
+        },
+        new ItemInfo
+        {
+            IDX = 10,
+            ItemID = "BHPP_A008",
+            ItemType = "Potion",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            DescriptID = "",
+        },
     };
 }

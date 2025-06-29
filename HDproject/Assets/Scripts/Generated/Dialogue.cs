@@ -1,24 +1,22 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Dialogue
 {
-    public string _IDX_;
-    public string _NPCInfoIDX_;
-    public string _MapID_;
-    public string __;
-    public string __;
-    public string __;
-    public string __;
-    public string __;
-    public string __;
-    public string __;
-    public string __;
+    public int IDX;
+    public int NPCInfoIDX;
+    public string MapID;
 }
 
 public static class DialogueData
 {
     public static readonly Dialogue[] Items = new Dialogue[]
     {
-        new Dialogue { _IDX_ = "1", _NPCInfoIDX_ = "1", _MapID_ = "ABMissingMine", __ = "", __ = "", __ = "", __ = "", __ = "", __ = "", __ = "", __ = "" },
+        new Dialogue
+        {
+            IDX = 1,
+            NPCInfoIDX = 1,
+            MapID = "ABMissingMine"
+        },
     };
 }

@@ -1,3 +1,4 @@
+using Photon.Pun.Demo.SlotRacer.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,30 +11,41 @@ using UnityEngine;
 public static class GoogleSheetLoader
 {
     private const string PrefKeyURLs = "GoogleDTEditor_SheetURLs";
-    private const string PrefKeyNames = "GoogleDTEditor_SheetNames";
+    private const string PrefKeySheetNames = "GoogleDTEditor_SheetTabNames";
+    private const string PrefKeyClassNames = "GoogleDTEditor_ClassNames";
 
 
 
     // 에디터Prefs에서 시트 목록 불러오기
-    public static void LoadPrefs(List<string> sheetURLs, List<string> sheetNames)
+    public static void LoadPrefs(List<string> sheetURLs, List<string> sheetTabNames, List<string> classNames)
     {
         sheetURLs.Clear();
-        sheetNames.Clear();
+        sheetTabNames.Clear();
+        classNames.Clear();
+
         string urlStr = EditorPrefs.GetString(PrefKeyURLs, "");
-        string nameStr = EditorPrefs.GetString(PrefKeyNames, "");
+        string tabStr = EditorPrefs.GetString(PrefKeySheetNames, "");
+        string classStr = EditorPrefs.GetString(PrefKeyClassNames, "");
+
         if (!string.IsNullOrEmpty(urlStr))
             sheetURLs.AddRange(urlStr.Split('|'));
-        if (!string.IsNullOrEmpty(nameStr))
-            sheetNames.AddRange(nameStr.Split('|'));
-        while (sheetNames.Count < sheetURLs.Count)
-            sheetNames.Add("");
+        if (!string.IsNullOrEmpty(tabStr))
+            sheetTabNames.AddRange(tabStr.Split('|'));
+        if (!string.IsNullOrEmpty(classStr))
+            classNames.AddRange(classStr.Split('|'));
+
+        while (sheetTabNames.Count < sheetURLs.Count)
+            sheetTabNames.Add("");
+        while (classNames.Count < sheetURLs.Count)
+            classNames.Add("");
     }
 
     // 에디터Prefs에 시트 목록 저장
-    public static void SavePrefs(List<string> sheetURLs, List<string> sheetNames)
+    public static void SavePrefs(List<string> sheetURLs, List<string> sheetTabNames, List<string> classNames)
     {
         EditorPrefs.SetString(PrefKeyURLs, string.Join("|", sheetURLs.ToArray()));
-        EditorPrefs.SetString(PrefKeyNames, string.Join("|", sheetNames.ToArray()));
+        EditorPrefs.SetString(PrefKeySheetNames, string.Join("|", sheetTabNames.ToArray()));
+        EditorPrefs.SetString(PrefKeyClassNames, string.Join("|", classNames.ToArray()));
     }
 
     public static List<List<string>> LoadCSVFromUrl(string csvUrl)
@@ -58,6 +70,27 @@ public static class GoogleSheetLoader
         {
             Debug.LogError("CSV 로딩 실패: " + e.Message);
         }
+        return result;
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+        for (int i = 0; i < line.Length; i++)
+        {
+            char c = line[i];
+            if (c == '"')
+            {
+                inQuotes = !inQuotes;
+            }
+            else if (c == ',' && !inQuotes)
+            {
+                result.Add(sb.ToString());
+                sb.Length = 0;
+            }
+            else
+            {
+                sb.Append(c);
+            }
+        }
+        result.Add(sb.ToString());
         return result;
     }
 

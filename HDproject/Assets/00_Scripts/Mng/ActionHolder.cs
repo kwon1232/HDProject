@@ -49,6 +49,11 @@ public class ActionHolder : MonoBehaviourPunCallbacks
             "파티를 초대하셨습니다.\n수락하시겠습니까?", 
             PhotonHelper.GetPlayerNickName(inviterID));
 
+        string Toast = string.Format("<color=#FFFF00>{0}</color>님에게 파티를 초대하였습니다.",
+            PhotonHelper.GetPlayerNickName(targetPlayerID));
+
+        ToastPopUPManager.instance.Initialize(Toast);
+
         // This code is a C# lambda expression,
         // defining an Action delegate (with no parameters and a void return type).
         Action Yes = () =>
