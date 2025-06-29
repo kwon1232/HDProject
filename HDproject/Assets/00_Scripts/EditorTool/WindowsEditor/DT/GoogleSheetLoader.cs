@@ -1,4 +1,3 @@
-using Photon.Pun.Demo.SlotRacer.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,27 +70,6 @@ public static class GoogleSheetLoader
             Debug.LogError("CSV 로딩 실패: " + e.Message);
         }
         return result;
-        System.Text.StringBuilder sb = new System.Text.StringBuilder();
-
-        for (int i = 0; i < line.Length; i++)
-        {
-            char c = line[i];
-            if (c == '"')
-            {
-                inQuotes = !inQuotes;
-            }
-            else if (c == ',' && !inQuotes)
-            {
-                result.Add(sb.ToString());
-                sb.Length = 0;
-            }
-            else
-            {
-                sb.Append(c);
-            }
-        }
-        result.Add(sb.ToString());
-        return result;
     }
 
 
@@ -125,13 +103,13 @@ public static class GoogleSheetLoader
 
 
     // 자동 코드 생성
-    public static void GenerateAllData(List<string> sheetURLs, List<string> sheetNames, string generatedDir = "Assets/Scripts/Generated/")
+    public static void GenerateAllData(List<string> sheetURLs, List<string> sheetTabNames, List<string> classNames, string generatedDir = "Assets/Scripts/Generated/")
     {
         for (int idx = 0; idx < sheetURLs.Count; idx++)
         {
             string url = sheetURLs[idx];
-            string sheetName = sheetNames[idx];
-            if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(sheetName))
+            string className = classNames[idx];
+            if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(className))
                 continue;
 
             string id = GoogleSheetURLParser.ExtractSpreadsheetId(url);
@@ -154,7 +132,7 @@ public static class GoogleSheetLoader
 
                     // 제네릭 코드 생성 호출
                     GenericSheetClassGenerator.Generate(
-                        sheetName.Replace(" ", ""),
+                        className.Replace(" ", ""),
                         headers,
                         types,
                         rows,
