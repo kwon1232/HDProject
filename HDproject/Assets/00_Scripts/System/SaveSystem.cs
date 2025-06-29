@@ -8,17 +8,36 @@ using UnityEngine;
 public class QuestSaveData
 {
     public List<int> completedQuestIDs = new List<int>();
+    public List<ActiveQuestSaveInfo> activeQuests = new List<ActiveQuestSaveInfo>();
 }
+
+[Serializable]
+public class ActiveQuestSaveInfo
+{
+    public int questID;
+    public List<RequirementProgress> requirements = new List<RequirementProgress>();
+}
+
+[Serializable]
+public class RequirementProgress
+{
+    public int requirementID;
+    public int progress;
+}
+
 
 public static class SaveSystem
 {
     private static readonly string saveDir = Path.Combine(Application.persistentDataPath, "save");
     private static readonly string saveFile = Path.Combine(saveDir, "quest.json");
 
-    public static void SaveQuests(List<int> completedQuestIDs)
+    public static void SaveQuests(List<int> completedQuestIDs, List<ActiveQuestSaveInfo> activeQuests)
     {
-        QuestSaveData data = new QuestSaveData { completedQuestIDs = completedQuestIDs };
-
+        var data = new QuestSaveData
+        {
+            completedQuestIDs = completedQuestIDs,
+            activeQuests = activeQuests
+        };
         string json = JsonUtility.ToJson(data);
         try
         {
@@ -32,24 +51,22 @@ public static class SaveSystem
         }
     }
 
-    public static List<int> LoadCompletedQuestIDs()
+    public static QuestSaveData LoadQuestData()
     {
-        if(!File.Exists(saveFile))
-        {
-            return new List<int>();
-        }
+        if (!File.Exists(saveFile))
+            return new QuestSaveData();
 
         try
         {
             string json = File.ReadAllText(saveFile);
             var data = JsonUtility.FromJson<QuestSaveData>(json);
-            if (data != null && data.completedQuestIDs != null)
-                return data.completedQuestIDs;
+            if (data != null)
+                return data;
         }
         catch (Exception e)
         {
             Debug.LogError($"Failed to load quests: {e.Message}");
         }
-        return new List<int>();
+        return new QuestSaveData();
     }
 }
