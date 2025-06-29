@@ -10,30 +10,41 @@ using UnityEngine;
 public static class GoogleSheetLoader
 {
     private const string PrefKeyURLs = "GoogleDTEditor_SheetURLs";
-    private const string PrefKeyNames = "GoogleDTEditor_SheetNames";
+    private const string PrefKeySheetNames = "GoogleDTEditor_SheetTabNames";
+    private const string PrefKeyClassNames = "GoogleDTEditor_ClassNames";
 
 
 
     // 에디터Prefs에서 시트 목록 불러오기
-    public static void LoadPrefs(List<string> sheetURLs, List<string> sheetNames)
+    public static void LoadPrefs(List<string> sheetURLs, List<string> sheetTabNames, List<string> classNames)
     {
         sheetURLs.Clear();
-        sheetNames.Clear();
+        sheetTabNames.Clear();
+        classNames.Clear();
+
         string urlStr = EditorPrefs.GetString(PrefKeyURLs, "");
-        string nameStr = EditorPrefs.GetString(PrefKeyNames, "");
+        string tabStr = EditorPrefs.GetString(PrefKeySheetNames, "");
+        string classStr = EditorPrefs.GetString(PrefKeyClassNames, "");
+
         if (!string.IsNullOrEmpty(urlStr))
             sheetURLs.AddRange(urlStr.Split('|'));
-        if (!string.IsNullOrEmpty(nameStr))
-            sheetNames.AddRange(nameStr.Split('|'));
-        while (sheetNames.Count < sheetURLs.Count)
-            sheetNames.Add("");
+        if (!string.IsNullOrEmpty(tabStr))
+            sheetTabNames.AddRange(tabStr.Split('|'));
+        if (!string.IsNullOrEmpty(classStr))
+            classNames.AddRange(classStr.Split('|'));
+
+        while (sheetTabNames.Count < sheetURLs.Count)
+            sheetTabNames.Add("");
+        while (classNames.Count < sheetURLs.Count)
+            classNames.Add("");
     }
 
     // 에디터Prefs에 시트 목록 저장
-    public static void SavePrefs(List<string> sheetURLs, List<string> sheetNames)
+    public static void SavePrefs(List<string> sheetURLs, List<string> sheetTabNames, List<string> classNames)
     {
         EditorPrefs.SetString(PrefKeyURLs, string.Join("|", sheetURLs.ToArray()));
-        EditorPrefs.SetString(PrefKeyNames, string.Join("|", sheetNames.ToArray()));
+        EditorPrefs.SetString(PrefKeySheetNames, string.Join("|", sheetTabNames.ToArray()));
+        EditorPrefs.SetString(PrefKeyClassNames, string.Join("|", classNames.ToArray()));
     }
 
     public static List<List<string>> LoadCSVFromUrl(string csvUrl)
@@ -92,13 +103,13 @@ public static class GoogleSheetLoader
 
 
     // 자동 코드 생성
-    public static void GenerateAllData(List<string> sheetURLs, List<string> sheetNames, string generatedDir = "Assets/Scripts/Generated/")
+    public static void GenerateAllData(List<string> sheetURLs, List<string> sheetTabNames, List<string> classNames, string generatedDir = "Assets/Scripts/Generated/")
     {
         for (int idx = 0; idx < sheetURLs.Count; idx++)
         {
             string url = sheetURLs[idx];
-            string sheetName = sheetNames[idx];
-            if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(sheetName))
+            string className = classNames[idx];
+            if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(className))
                 continue;
 
             string id = GoogleSheetURLParser.ExtractSpreadsheetId(url);
@@ -121,7 +132,7 @@ public static class GoogleSheetLoader
 
                     // 제네릭 코드 생성 호출
                     GenericSheetClassGenerator.Generate(
-                        sheetName.Replace(" ", ""),
+                        className.Replace(" ", ""),
                         headers,
                         types,
                         rows,
