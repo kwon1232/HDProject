@@ -20,6 +20,7 @@ public class QuestInfo
     public string RewardItem2;
     public string RewardItem3;
     public int RewardGold;
+    public string QuestRequireInfo;
 }
 
 public static class QuestInfoData
@@ -41,10 +42,11 @@ public static class QuestInfoData
             Region = "",
             MapName = "",
             RewardExp = 50,
-            RewardItem1 = "Item_Haedok",
-            RewardItem2 = "",
-            RewardItem3 = "",
+            RewardItem1 = "ITEM_A010",
+            RewardItem2 = "ITEM_A008",
+            RewardItem3 = "ITEM_A003",
             RewardGold = 50,
+            QuestRequireInfo = "Q_RE0001",
         },
         new QuestInfo
         {
@@ -65,6 +67,7 @@ public static class QuestInfoData
             RewardItem2 = "Item_WolfFur",
             RewardItem3 = "Item_HealingHerb",
             RewardGold = 60,
+            QuestRequireInfo = "Q_RE0002",
         },
         new QuestInfo
         {
@@ -85,6 +88,7 @@ public static class QuestInfoData
             RewardItem2 = "Item_Bread",
             RewardItem3 = "",
             RewardGold = 150,
+            QuestRequireInfo = "Q_RE0003",
         },
         new QuestInfo
         {
@@ -105,6 +109,28 @@ public static class QuestInfoData
             RewardItem2 = "Item_Torch",
             RewardItem3 = "",
             RewardGold = 1000,
+            QuestRequireInfo = "Q_RE0004",
+        },
+        new QuestInfo
+        {
+            IDX = 5,
+            NameID = "QND0005",
+            Name_KO = "가디언을 구하라",
+            InfoNotesID = "QIN0005",
+            InfoNotes_KO = "가디언을 구하기 위해 보스 몬스터를 처치하시오.",
+            Type = "Main",
+            Difficulty = "Normal",
+            IsLinkedToStory = true,
+            StoryID = "Story001",
+            StoryIndex = "3",
+            Region = "",
+            MapName = "",
+            RewardExp = 1000,
+            RewardItem1 = "투구",
+            RewardItem2 = "옷",
+            RewardItem3 = "장갑",
+            RewardGold = 1000,
+            QuestRequireInfo = "Q_RE0005",
         },
     };
 }

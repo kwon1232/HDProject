@@ -10,7 +10,7 @@ public class ItemInfo
     public string IconPath;
     public string IconFramePath;
     public string PrefabPath;
-    public string DescriptID;
+    public string Descript_KO;
 }
 
 public static class ItemInfoData
@@ -20,112 +20,123 @@ public static class ItemInfoData
         new ItemInfo
         {
             IDX = 1,
-            ItemID = "BHPP_A001",
+            ItemID = "ITEM_A001",
             ItemType = "Potion",
             Grade = "Nomal",
             IconPath = "",
             IconFramePath = "",
             PrefabPath = "",
-            DescriptID = "DID0001",
+            Descript_KO = "",
         },
         new ItemInfo
         {
             IDX = 2,
-            ItemID = "BMPP_A001",
+            ItemID = "ITEM_A002",
             ItemType = "Potion",
             Grade = "Nomal",
             IconPath = "",
             IconFramePath = "",
             PrefabPath = "",
-            DescriptID = "DID0002",
+            Descript_KO = "",
         },
         new ItemInfo
         {
             IDX = 3,
-            ItemID = "BEPP_A001",
+            ItemID = "ITEM_A003",
             ItemType = "Potion",
             Grade = "Nomal",
             IconPath = "",
             IconFramePath = "",
             PrefabPath = "",
-            DescriptID = "DID0003",
+            Descript_KO = "",
         },
         new ItemInfo
         {
             IDX = 4,
-            ItemID = "BHPP_A002",
+            ItemID = "ITEM_A004",
             ItemType = "Potion",
             Grade = "Nomal",
             IconPath = "",
             IconFramePath = "",
             PrefabPath = "",
-            DescriptID = "",
+            Descript_KO = "",
         },
         new ItemInfo
         {
             IDX = 5,
-            ItemID = "BHPP_A003",
+            ItemID = "ITEM_A005",
             ItemType = "Potion",
             Grade = "Nomal",
             IconPath = "",
             IconFramePath = "",
             PrefabPath = "",
-            DescriptID = "",
+            Descript_KO = "",
         },
         new ItemInfo
         {
             IDX = 6,
-            ItemID = "BHPP_A004",
+            ItemID = "ITEM_A006",
             ItemType = "Potion",
             Grade = "Nomal",
             IconPath = "",
             IconFramePath = "",
             PrefabPath = "",
-            DescriptID = "",
+            Descript_KO = "",
         },
         new ItemInfo
         {
             IDX = 7,
-            ItemID = "BHPP_A005",
+            ItemID = "ITEM_A007",
             ItemType = "Potion",
             Grade = "Nomal",
             IconPath = "",
             IconFramePath = "",
             PrefabPath = "",
-            DescriptID = "",
+            Descript_KO = "",
         },
         new ItemInfo
         {
             IDX = 8,
-            ItemID = "BHPP_A006",
+            ItemID = "ITEM_A008",
             ItemType = "Potion",
             Grade = "Nomal",
             IconPath = "",
             IconFramePath = "",
             PrefabPath = "",
-            DescriptID = "",
+            Descript_KO = "",
         },
         new ItemInfo
         {
             IDX = 9,
-            ItemID = "BHPP_A007",
+            ItemID = "ITEM_A009",
             ItemType = "Potion",
             Grade = "Nomal",
             IconPath = "",
             IconFramePath = "",
             PrefabPath = "",
-            DescriptID = "",
+            Descript_KO = "",
         },
         new ItemInfo
         {
             IDX = 10,
-            ItemID = "BHPP_A008",
+            ItemID = "ITEM_A010",
             ItemType = "Potion",
             Grade = "Nomal",
             IconPath = "",
             IconFramePath = "",
             PrefabPath = "",
-            DescriptID = "",
+            Descript_KO = "",
+        },
+        new ItemInfo
+        {
+            IDX = 11,
+            ItemID = "ITEM_A011",
+            ItemType = "ETC",
+            Grade = "Nomal",
+            IconPath = "",
+            IconFramePath = "",
+            PrefabPath = "",
+            Descript_KO = "투구꽃",
         },
     };
 }
