@@ -35,7 +35,8 @@ public static class GoogleSheetURLParser
 public class GoogleDTEditor : EditorWindow
 {
     private List<string> sheetURLs = new List<string>();
-    private List<string> sheetNames = new List<string>();
+    private List<string> sheetTabNames = new List<string>();
+    private List<string> classNames = new List<string>();
     private string searchString = "";
     private Vector2 scroll;
 
@@ -47,12 +48,12 @@ public class GoogleDTEditor : EditorWindow
 
     private void OnEnable()
     {
-        GoogleSheetLoader.LoadPrefs(sheetURLs, sheetNames);
+        GoogleSheetLoader.LoadPrefs(sheetURLs, sheetTabNames, classNames);
     }
 
     private void OnDisable()
     {
-        GoogleSheetLoader.SavePrefs(sheetURLs, sheetNames);
+        GoogleSheetLoader.SavePrefs(sheetURLs, sheetTabNames, classNames);
     }
 
     private void OnGUI()
@@ -64,20 +65,19 @@ public class GoogleDTEditor : EditorWindow
         scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.Height(250));
         for (int i = 0; i < sheetURLs.Count; i++)
         {
-            EditorGUILayout.BeginHorizontal();
-            // ... UI들 ...
-            bool toDelete = false;
-            if (GUILayout.Button("삭제"))
-            {
-                toDelete = true;
-            }
-            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginVertical("box");
+            sheetURLs[i] = EditorGUILayout.TextField("Sheet URL", sheetURLs[i]);
+            sheetTabNames[i] = EditorGUILayout.TextField("Sheet Name", sheetTabNames[i]);
+            classNames[i] = EditorGUILayout.TextField("Class Name", classNames[i]);
+            bool toDelete = GUILayout.Button("삭제");
+            EditorGUILayout.EndVertical();
 
             if (toDelete)
             {
                 sheetURLs.RemoveAt(i);
-                sheetNames.RemoveAt(i);
-                GoogleSheetLoader.SavePrefs(sheetURLs, sheetNames);
+                sheetTabNames.RemoveAt(i);
+                classNames.RemoveAt(i);
+                GoogleSheetLoader.SavePrefs(sheetURLs, sheetTabNames, classNames);
                 break;
             }
         }
@@ -86,22 +86,23 @@ public class GoogleDTEditor : EditorWindow
         if (GUILayout.Button("Add Sheet"))
         {
             sheetURLs.Add("");
-            sheetNames.Add("");
-            GoogleSheetLoader.SavePrefs(sheetURLs, sheetNames);
+            sheetTabNames.Add("");
+            classNames.Add("");
+            GoogleSheetLoader.SavePrefs(sheetURLs, sheetTabNames, classNames);
         }
 
         EditorGUILayout.Space();
 
         if (GUILayout.Button("Generate All Data Classes"))
         {
-            GoogleSheetLoader.GenerateAllData(sheetURLs, sheetNames);
-            GoogleSheetLoader.SavePrefs(sheetURLs, sheetNames);
+            GoogleSheetLoader.GenerateAllData(sheetURLs, sheetTabNames, classNames);
+            GoogleSheetLoader.SavePrefs(sheetURLs, sheetTabNames, classNames);
         }
 
         if (GUILayout.Button("Update Data"))
         {
-            GoogleSheetLoader.GenerateAllData(sheetURLs, sheetNames);
-            GoogleSheetLoader.SavePrefs(sheetURLs, sheetNames);
+            GoogleSheetLoader.GenerateAllData(sheetURLs, sheetTabNames, classNames);
+            GoogleSheetLoader.SavePrefs(sheetURLs, sheetTabNames, classNames);
         }
 
         EditorGUILayout.Space();
@@ -109,8 +110,9 @@ public class GoogleDTEditor : EditorWindow
         if (GUILayout.Button("Reset"))
         {
             sheetURLs.Clear();
-            sheetNames.Clear();
-            GoogleSheetLoader.SavePrefs(sheetURLs, sheetNames);
+            sheetTabNames.Clear();
+            classNames.Clear();
+            GoogleSheetLoader.SavePrefs(sheetURLs, sheetTabNames, classNames);
         }
     }
 }

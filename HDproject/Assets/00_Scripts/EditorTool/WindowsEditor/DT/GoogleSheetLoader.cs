@@ -125,13 +125,13 @@ public static class GoogleSheetLoader
 
 
     // 자동 코드 생성
-    public static void GenerateAllData(List<string> sheetURLs, List<string> sheetNames, string generatedDir = "Assets/Scripts/Generated/")
+    public static void GenerateAllData(List<string> sheetURLs, List<string> sheetTabNames, List<string> classNames, string generatedDir = "Assets/Scripts/Generated/")
     {
         for (int idx = 0; idx < sheetURLs.Count; idx++)
         {
             string url = sheetURLs[idx];
-            string sheetName = sheetNames[idx];
-            if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(sheetName))
+            string className = classNames[idx];
+            if (string.IsNullOrWhiteSpace(url) || string.IsNullOrWhiteSpace(className))
                 continue;
 
             string id = GoogleSheetURLParser.ExtractSpreadsheetId(url);
@@ -154,7 +154,7 @@ public static class GoogleSheetLoader
 
                     // 제네릭 코드 생성 호출
                     GenericSheetClassGenerator.Generate(
-                        sheetName.Replace(" ", ""),
+                        className.Replace(" ", ""),
                         headers,
                         types,
                         rows,
