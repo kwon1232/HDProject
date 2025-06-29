@@ -7,5 +7,5 @@ public static class DataDirectory
     public static readonly ItemInfo[] ItemInfoItems = ItemInfoData.Items;
     public static readonly Map_MissingMineInAbyssinian[] Map_MissingMineInAbyssinianItems = Map_MissingMineInAbyssinianData.Items;
     public static readonly PlayerSystem[] PlayerSystemItems = PlayerSystemData.Items;
-    public static readonly Quest[] QuestItems = QuestData.Items;
+    public static readonly QuestInfo[] QuestInfoItems = QuestInfoData.Items;
 }
