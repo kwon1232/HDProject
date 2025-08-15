@@ -14,6 +14,7 @@ public class NPCInfo
     public string OccupationType_;
     public string PrefabPath;
     public string IconPath;
+    public string[] QuestList;
 }
 
 public static class NPCInfoData
@@ -33,6 +34,7 @@ public static class NPCInfoData
             OccupationType_ = "Miner",
             PrefabPath = "Character/NPC/NPC",
             IconPath = "Images/NPC/PoisonQuestMinerImage",
+            QuestList = new string[] { "QND0001" , "QND0004", "QND0004"},
         },
         new NPCInfo
         {
@@ -47,6 +49,7 @@ public static class NPCInfoData
             OccupationType_ = "DungeonKeeper",
             PrefabPath = "",
             IconPath = "",
+            QuestList = new string[] { "QND0002" },
         },
         new NPCInfo
         {
@@ -61,6 +64,7 @@ public static class NPCInfoData
             OccupationType_ = "Kid",
             PrefabPath = "",
             IconPath = "",
+            QuestList = new string[] { "QIN0005" }
         },
     };
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-
 [Serializable]
 public class QuestSaveData
 {
@@ -33,7 +32,7 @@ public static class SaveSystem
 
     public static void SaveQuests(List<int> completedQuestIDs, List<ActiveQuestSaveInfo> activeQuests)
     {
-        var data = new QuestSaveData
+        QuestSaveData data = new QuestSaveData
         {
             completedQuestIDs = completedQuestIDs,
             activeQuests = activeQuests
@@ -59,7 +58,7 @@ public static class SaveSystem
         try
         {
             string json = File.ReadAllText(saveFile);
-            var data = JsonUtility.FromJson<QuestSaveData>(json);
+            QuestSaveData data = JsonUtility.FromJson<QuestSaveData>(json);
             if (data != null)
                 return data;
         }

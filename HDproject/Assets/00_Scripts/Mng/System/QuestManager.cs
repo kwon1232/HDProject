@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,16 +13,29 @@ public class Quest
 {
     public QuestInfo info { get; private set; }
     public QuestState state { get; private set; }
+    public Dictionary<int, int> Progress { get; private set; }
 
-    public Quest(QuestInfo info)
+    public Quest(QuestInfo info, List<QuestRequireInfo> requirements)
     {
         this.info = info;
+        Progress = new Dictionary<int, int>();
+        foreach (var req in requirements)
+        {
+            if (!Progress.ContainsKey(req.IDX))
+                Progress.Add(req.IDX, 0);
+        }
         state = QuestState.NotStarted;
     }
 
     public void Start()
     {
         state = QuestState.InProgress;
+    }
+
+    public void SetRequirementProgress(int requirementID, int value)
+    {
+        if (Progress.ContainsKey(requirementID))
+            Progress[requirementID] = value;
     }
 
     public void Complete()
@@ -32,40 +46,113 @@ public class Quest
 
 public class QuestManager : MonoBehaviour
 {
+    public static QuestManager instance { get; private set; }
     private readonly List<Quest> activeQuests = new List<Quest>();
     private readonly List<Quest> completedQuests = new List<Quest>();
 
     private void Awake()
     {
-        LoadCompletedQuests();
+        // 싱글톤 패턴 인스턴스가 이미 존재하면 중복 생성 방지
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        instance = this;
+
+        LoadQuests();
     }
 
     public IReadOnlyList<Quest> ActiveQuests => activeQuests;
     public IReadOnlyList<Quest> CompletedQuests => completedQuests;
 
-    private void LoadCompletedQuests()
+    private static string NormalizeQuestID(string nameId)
     {
-        List<int> ids = SaveSystem.LoadCompletedQuestIDs();
-        foreach (int id in ids)
+        string digits = "";
+        for (int i = 0; i < nameId.Length; i++)
+        {
+            char c = nameId[i];
+            if (c >= '0' && c <= '9')
+                digits += c;
+        }
+        int num = 0;
+        int.TryParse(digits, out num);
+        if (num < 0) num = 0;
+        string qid = "QND" + num.ToString("D4");
+        return qid;
+    }
+
+    private List<QuestRequireInfo> GetRequirementsForQuest(QuestInfo info)
+    {
+        string qid = NormalizeQuestID(info.NameID);
+        var list = new List<QuestRequireInfo>();
+        var items = DataDirectory.QuestRequireInfoItems;
+        for (int i = 0; i < items.Length; i++)
+        {
+            var r = items[i];
+            if (r.QuestID == qid)
+                list.Add(r);
+        }
+        return list;
+    }
+
+    private void LoadQuests()
+    {
+        QuestSaveData data = SaveSystem.LoadQuestData();
+        foreach (int id in data.completedQuestIDs)
         {
             QuestInfo info = System.Array.Find(DataDirectory.QuestInfoItems, q => q.IDX == id);
             if (info != null)
             {
-                var quest = new Quest(info);
+                var reqs = GetRequirementsForQuest(info);
+                var quest = new Quest(info, reqs);
                 quest.Complete();
                 completedQuests.Add(quest);
             }
         }
+
+        foreach (var saved in data.activeQuests)
+        {
+            QuestInfo info = System.Array.Find(DataDirectory.QuestInfoItems, q => q.IDX == saved.questID);
+            if (info != null)
+            {
+                var reqs = GetRequirementsForQuest(info);
+                var quest = new Quest(info, reqs);
+                for (int i = 0; i < saved.requirements.Count; i++)
+                {
+                    var rp = saved.requirements[i];
+                    quest.SetRequirementProgress(rp.requirementID, rp.progress);
+                }
+                quest.Start();
+                activeQuests.Add(quest);
+            }
+        }
     }
 
-    private void SaveCompletedQuests()
+    private void SaveQuests()
     {
-        var ids = new List<int>();
+        var completedIDs = new List<int>();
         foreach (var quest in completedQuests)
         {
-            ids.Add(quest.info.IDX);
+            completedIDs.Add(quest.info.IDX);
         }
-        SaveSystem.SaveQuests(ids);
+
+        var activeInfos = new List<ActiveQuestSaveInfo>();
+        foreach (var quest in activeQuests)
+        {
+            var info = new ActiveQuestSaveInfo();
+            info.questID = quest.info.IDX;
+            foreach (var kv in quest.Progress)
+            {
+                var rp = new RequirementProgress();
+                rp.requirementID = kv.Key;
+                rp.progress = kv.Value;
+                info.requirements.Add(rp);
+            }
+            activeInfos.Add(info);
+        }
+
+        SaveSystem.SaveQuests(completedIDs, activeInfos);
     }
 
     public void AcceptQuest(int questID)
@@ -88,12 +175,12 @@ public class QuestManager : MonoBehaviour
             if (currentIndex > 1)
             {
                 bool prevCompleted = false;
-                foreach (var questInfo in completedQuests)
+                foreach (var quest in completedQuests)
                 {
-                    if (questInfo.info.IsLinkedToStory && questInfo.info.StoryID == info.StoryID)
+                    if (quest.info.IsLinkedToStory && quest.info.StoryID == info.StoryID)
                     {
                         int idx;
-                        if (int.TryParse(questInfo.info.StoryIndex, out idx) && idx == currentIndex - 1)
+                        if (int.TryParse(quest.info.StoryIndex, out idx) && idx == currentIndex - 1)
                         {
                             prevCompleted = true;
                             break;
@@ -109,9 +196,16 @@ public class QuestManager : MonoBehaviour
             }
         }
 
-        Quest quest = new Quest(info);
-        quest.Start();
-        activeQuests.Add(quest);
+        var reqsForQuest = GetRequirementsForQuest(info);
+        Quest Newquest = new Quest(info, reqsForQuest);
+        Newquest.Start();
+        activeQuests.Add(Newquest);
+        SaveQuests();
+    }
+
+    public bool IsQuestCleared(int questID)
+    {
+        return false;
     }
 
     public void CompleteQuest(int questID)
@@ -124,10 +218,18 @@ public class QuestManager : MonoBehaviour
         activeQuests.Remove(quest);
         completedQuests.Add(quest);
 
-        SaveCompletedQuests();
+        SaveQuests();
 
         // TODO: reward logic (exp, items, etc.)
-        // 플레이어 클래스 가져와서 경험치, 아이템 인벤토리에 추가, 등등 해주기
+    }
+
+    public void UpdateQuestProgress(int questID, int requirementID, int progress)
+    {
+        Quest quest = activeQuests.Find(q => q.info.IDX == questID);
+        if (quest == null)
+            return;
+        quest.SetRequirementProgress(requirementID, progress);
+        SaveQuests();
     }
 
     public static void PrintAllQuestInfo()

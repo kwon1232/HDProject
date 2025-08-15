@@ -16,7 +16,9 @@ public class DialogueUI : MonoBehaviour
     [SerializeField] private Button closeBtn;
     [SerializeField] private Button nextBtn;
     [SerializeField] private Button yesBtn, noBtn;
-    
+
+    [SerializeField] public int questID;
+
     private const int answerMaxCount = 3;
 
     [Header("Localization (선택)")]
@@ -29,6 +31,13 @@ public class DialogueUI : MonoBehaviour
     private string[] lines;       
     private int currentIndex;     
     private string currentPortraitPath;    // 현재 사용할 초상화 리소스 경로를 저장
+
+    void Start()
+    {
+        // 버튼 클릭 시 AcceptQuest 호출
+        yesBtn.onClick.AddListener(OnYesBtnClicked);
+    }
+
 
     /// <summary>
     /// Resources에서 대화 UI 프리팹을 로드하여 생성하고 캔버스 하위에 배치
@@ -165,6 +174,13 @@ public class DialogueUI : MonoBehaviour
     {
         if (dialogueText != null)
             dialogueText.text = translated;    
+    }
+
+    private void OnYesBtnClicked()
+    {
+        QuestManager.instance.AcceptQuest(questID);
+        // 버튼 비활성화 등 추가 동작
+        yesBtn.interactable = false;
     }
 
     public void Close()
